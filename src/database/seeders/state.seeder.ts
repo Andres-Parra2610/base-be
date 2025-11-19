@@ -1,4 +1,4 @@
-import { State } from "src/common/entities/state.entity";
+import { State } from "src/shared/entities/state.entity";
 import { DataSource } from "typeorm";
 
 export const stateSeeder = async (source: DataSource) => {

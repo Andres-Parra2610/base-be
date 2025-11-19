@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsOptional, IsString, IsNumber, Matches, IsArray, ValidateNested, ArrayMinSize, IsEmail } from 'class-validator';
-import { IsUniqueProperty } from 'src/core/decorators/unique-property.decorator';
+import { IsUniqueProperty } from 'src/shared/decorators/unique-property.decorator';
 
 export class CreateUserDto {
   @IsNotEmpty()

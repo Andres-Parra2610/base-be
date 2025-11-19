@@ -1,5 +1,5 @@
-import { City } from 'src/common/entities/city.entity';
-import { State } from 'src/common/entities/state.entity';
+import { City } from 'src/shared/entities/city.entity';
+import { State } from 'src/shared/entities/state.entity';
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity({ name: 'users' })

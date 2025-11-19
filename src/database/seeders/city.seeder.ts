@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
-import { City } from 'src/common/entities/city.entity';
-import { State } from 'src/common/entities/state.entity';
+import { City } from 'src/shared/entities/city.entity';
+import { State } from 'src/shared/entities/state.entity';
 
 const ciudadesPorEstado = {
   'Amazonas': ['Maroa', 'Puerto Ayacucho', 'San Fernando de Atabapo'],
