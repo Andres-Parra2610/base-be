@@ -1,8 +1,8 @@
-import { DataSource } from 'typeorm';
 import { City } from 'src/shared/entities/city.entity';
 import { State } from 'src/shared/entities/state.entity';
+import { DataSource } from 'typeorm';
 
-const ciudadesPorEstado = {
+const citiesByState = {
   'Amazonas': ['Maroa', 'Puerto Ayacucho', 'San Fernando de Atabapo'],
   'Anzoátegui': ['Anaco', 'Aragua de Barcelona', 'Barcelona', 'Boca de Uchire', 'Cantaura', 'Clarines', 'El Chaparro', 'El Pao Anzoátegui', 'El Tigre', 'El Tigrito', 'Guanape', 'Guanta', 'Lechería', 'Onoto', 'Pariaguán', 'Píritu', 'Puerto La Cruz', 'Puerto Píritu', 'Sabana de Uchire', 'San Mateo Anzoátegui', 'San Pablo Anzoátegui', 'San Tomé', 'Santa Ana de Anzoátegui', 'Santa Fe Anzoátegui', 'Santa Rosa', 'Soledad', 'Urica', 'Valle de Guanape'],
   'Apure': ['Achaguas', 'Biruaca', 'Bruzual', 'El Amparo', 'El Nula', 'Elorza', 'Guasdualito', 'Mantecal', 'Puerto Páez', 'San Fernando de Apure', 'San Juan de Payara'],
@@ -25,7 +25,7 @@ const ciudadesPorEstado = {
   'Trujillo': ['Batatal', 'Betijoque', 'Boconó', 'Carache', 'Chejende', 'Cuicas', 'El Dividive', 'El Jaguito', 'Escuque', 'Isnotú', 'Jajó', 'La Ceiba', 'La Concepción de Trujllo', 'La Mesa de Esnujaque', 'La Puerta', 'La Quebrada', 'Mendoza Fría', 'Meseta de Chimpire', 'Monay', 'Motatán', 'Pampán', 'Pampanito', 'Sabana de Mendoza', 'San Lázaro', 'Santa Ana de Trujillo', 'Tostós', 'Trujillo', 'Valera'],
   'La Guaira': ['Carayaca', 'Litoral', 'La Guaira', 'Catia La Mar', 'Macuto', 'Naiguatá'],
   'Yaracuy': ['Aroa', 'Boraure', 'Campo Elías de Yaracuy', 'Chivacoa', 'Cocorote', 'Farriar', 'Guama', 'Marín', 'Nirgua', 'Sabana de Parra', 'Salom', 'San Felipe', 'San Pablo de Yaracuy', 'Urachiche', 'Yaritagua', 'Yumare'],
-  'Zulia': ['Bachaquero', 'Bobures', 'Cabimas', 'Campo Concepción', 'Campo Mara', 'Campo Rojo', 'Carrasquero', 'Casigua', 'Chiquinquirá', 'Ciudad Ojeda', 'El Batey', 'El Carmelo', 'El Chivo', 'El Guayabo', 'El Mene', 'El Venado', 'Encontrados', 'Gibraltar', 'Isla de Toas', 'La Concepción del Zulia', 'La Paz', 'La Sierrita', 'Lagunillas del Zulia', 'Las Piedras de Perijá', 'Los Cortijos', 'Machiques', 'Maracaibo', 'Mene Grande', 'Palmarejo', 'Paraguaipoa', 'Potrerito', 'Pueblo Nuevo del Zulia', 'Puertos de Altagracia', 'Punta Gorda', 'Sabaneta de Palma', 'San Francisco', 'San José de Perijá', 'San Rafael del Moján', 'San Timoteo', 'Santa Bárbara Del Zulia', 'Santa Cruz de Mara', 'Santa Cruz del Zulia', 'Santa Rita', 'Sinamaica', 'Tamare', 'Tía Juana', 'Villa del Rosario'],
+  'Zulia': ['Bachaquero', 'Bobures', 'Cabimas', 'Campo Concepción', 'Campo Mara', 'Campo Rojo', 'Carrasquero', 'Casigua', 'Chiquinquirá', 'Ciudad Ojeda', 'El Batey', 'El Carmelo', 'El Chivo', 'El Guayabo', 'El Mene', 'El Venado', 'Encontrados', 'Gibraltar', 'Isla de Toas', 'La Concepción del Zulia', 'La Paz', 'La Sierrita', 'Lagunillas del Zulia', 'Las Piedras de Perijá', 'Los Cortijos', 'Machiques', 'Maracaibo', 'Mene Grande', 'Palmarejo', 'Paraguaipoa', 'Perijá', 'Potrerito', 'Pueblo Nuevo del Zulia', 'Puertos de Altagracia', 'Punta Gorda', 'Sabaneta de Palma', 'San Francisco', 'San José de Perijá', 'San Rafael del Moján', 'San Timoteo', 'Santa Bárbara Del Zulia', 'Santa Cruz de Mara', 'Santa Cruz del Zulia', 'Santa Rita', 'Sinamaica', 'Tamare', 'Tía Juana', 'Villa del Rosario'],
   'Distrito Capital': ['Caracas', 'El Junquito'],
   'Dependencias Federales': ['Archipiélago Los Roques', 'Archipiélago Los Monjes', 'Isla La Tortuga y Cayos adyacentes', 'Isla La Sola', 'Islas Los Testigos', 'Islas Los Frailes', 'Isla La Orchila', 'Archipiélago Las Aves', 'Isla de Aves', 'Isla La Blanquilla', 'Isla de Patos', 'Islas Los Hermanos']
 };
@@ -34,32 +34,31 @@ export const citySeeder = async (source: DataSource) => {
   const stateRepo = source.getRepository(State);
   const cityRepo = source.getRepository(City);
 
-  /* Borrar ciudades anteriores */
   await cityRepo.deleteAll()
 
-  const estados = await stateRepo.find();
+  const stated = await stateRepo.find();
   const stateMap = new Map<string, string>();
-  estados.forEach(state => stateMap.set(state.name, state.id));
+  stated.forEach(state => stateMap.set(state.name, state.id));
 
   const missingStates: string[] = [];
 
-  const cities = Object.entries(ciudadesPorEstado).flatMap(([estado, ciudades]) => {
-    const stateId = stateMap.get(estado);
+  const allCities = Object.entries(citiesByState).flatMap(([state, cities]) => {
+    const stateId = stateMap.get(state);
     if (!stateId) {
-      missingStates.push(estado);
+      missingStates.push(state);
       return [];
     }
 
-    return ciudades.map(nombreCiudad => ({
-      name: nombreCiudad,
+    return cities.map(cityName => ({
+      name: cityName,
       stateId,
     }));
   });
 
   if (missingStates.length > 0) {
     console.warn('\x1b[33m%s\x1b[0m', '⚠️ Estados no encontrados (revisar nombres en DB):');
-    missingStates.forEach(estado => console.warn(`- ${estado}`));
+    missingStates.forEach(state => console.warn(`- ${state}`));
   }
 
-  await cityRepo.insert(cities);
+  await cityRepo.insert(allCities);
 };

@@ -13,13 +13,11 @@ export const userSeeder = async (source: DataSource) => {
 
   await repository.insert([
     {
-      name: 'Admin',
-      lastname: 'a4agro',
+      fullName: 'Full admin',
       identityDocument: '123456789',
       typeDocument: 'J',
       email: 'admin@admin.com',
       password: bcrypt.hashSync('123456', 10),
-      userType: 'admin',
     }
   ]);
 
