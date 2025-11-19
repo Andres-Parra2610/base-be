@@ -4,15 +4,18 @@ import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
 import { env } from './config/env';
 import { Logger } from '@nestjs/common';
-import { globalValidationExceptionFactory } from './core/execptions/excptios-factory';
-import { AllExceptionsFilter } from './core/execptions/exception-filter';
+import { globalValidationExceptionFactory } from './core/exceptions/exception-factory';
+import { AllExceptionsFilter } from './core/exceptions/exception-filter';
+import { initializeTransactionalContext, StorageDriver } from 'typeorm-transactional';
 
 async function bootstrap() {
   const logger = new Logger('Base Backend')
-
+  initializeTransactionalContext({ storageDriver: StorageDriver.ASYNC_LOCAL_STORAGE });
 
   const app = await NestFactory.create(AppModule, { cors: true });
-  app.use(helmet());
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  }));
 
   // Set global prefix for all routes
   app.setGlobalPrefix('api/v1');

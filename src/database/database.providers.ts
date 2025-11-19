@@ -1,5 +1,8 @@
 import { env } from 'src/config/env';
 import { DataSource } from 'typeorm';
+import { addTransactionalDataSource } from 'typeorm-transactional';
+
+const isProduction = env.NODE_ENV === 'production';
 
 export const dataSource = new DataSource({
   type: 'postgres',
@@ -12,14 +15,16 @@ export const dataSource = new DataSource({
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   migrationsTableName: 'migrations',
   synchronize: false,
-
+  ssl: isProduction ? {
+    rejectUnauthorized: false,
+  } : false,
 });
 
 export const databaseProviders = [
   {
     provide: 'DATA_SOURCE',
     useFactory: async () => {
-      return dataSource.initialize();
+      return addTransactionalDataSource(dataSource).initialize();
     },
   },
 ];
