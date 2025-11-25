@@ -1,0 +1,35 @@
+services:
+  backend:
+    build: .
+    volumes:
+      - ./src:/usr/src/app/src
+    ports:
+      - '3000:3000'
+    container_name: base-backend
+    command: pnpm run start:dev
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+      - DATABASE_HOST=base-db
+      - DATABASE_PORT=5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=base
+      - JWT_SECRET=secret
+      - JWT_REFRESH_TOKEN=refresh_token
+    depends_on:
+      - base-db
+
+  #================= Database =================
+
+  base-db:
+    image: postgres:17.0-alpine
+    restart: always
+    ports:
+      - '6000:5432'
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=base
