@@ -23,7 +23,8 @@
     "migration:run": "pnpm run typeorm migration:run -d src/database/database.providers.ts",
     "migration:revert": "pnpm run typeorm migration:revert -d src/database/database.providers.ts",
     "migration:create": "pnpm run typeorm migration:create src/migrations/",
-    "seed": "ts-node -r tsconfig-paths/register src/database/seeders/seeds.ts"
+    "seed": "ts-node -r tsconfig-paths/register src/database/seeders/seeds.ts",
+    "generate:module": "./generate-module.sh"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
