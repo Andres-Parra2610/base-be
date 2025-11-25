@@ -1,4 +1,3 @@
-import { Producer } from 'src/modules/producers/entities/producers.entity';
 import { Base } from 'src/shared/entities/base-entity';
 import { City } from 'src/shared/entities/city.entity';
 import { State } from 'src/shared/entities/state.entity';
@@ -43,9 +42,4 @@ export class User extends Base {
   @ManyToOne(() => City, { eager: true, nullable: true })
   @JoinColumn({ name: 'city_id' })
   city: City;
-
-
-  @OneToOne(() => Producer, (producer) => producer.user)
-  producer: Producer
-
 }

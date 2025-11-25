@@ -7,13 +7,11 @@ import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { ClsModule } from 'nestjs-cls';
 import { RequestInterceptor } from './core/interceptors/request.interceptor';
 import { SharedModule } from './shared/modules/shared.module';
+import { APP_MODULES } from './modules';
 
 @Module({
   imports: [
-    DatabaseModule,
-    UsersModule,
-    AuthModule,
-    SharedModule,
+    ...APP_MODULES,
     ClsModule.forRoot({
       global: true,
       middleware: {
