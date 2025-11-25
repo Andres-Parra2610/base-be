@@ -5,11 +5,8 @@ import { IsUniqueProperty } from 'src/shared/decorators/unique-property.decorato
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  fullName: string;
 
-  @IsOptional()
-  @IsString()
-  lastname?: string;
 
   @IsNotEmpty()
   @IsString()
@@ -31,30 +28,16 @@ export class CreateUserDto {
   @IsString()
   stateId?: string;
 
-  @IsOptional()
-  @IsString()
-  physicalAddress?: string;
 
   @IsOptional()
   @IsString()
   contactNumber?: string;
 
-  @IsOptional()
   @IsEmail()
-  email?: string;
+  email: string;
 
-  @IsNotEmpty()
-  @IsEnum(['vendedor', 'cliente'], { message: 'userType debe ser vendedor o cliente' })
-  userType: string;
-
-  @IsOptional()
-  @IsNumber()
-  clientTypeId?: number;
-
-  @IsOptional()
   @IsString()
-  password?: string;
-
+  password: string;
 }
 
 

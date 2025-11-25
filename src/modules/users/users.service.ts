@@ -3,82 +3,48 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { GetUserDto } from './dto/get-user.dto';
-import * as Pagination from 'src/utils/pagination';
-import { UserRepository } from './user.repository';
+import { CreateUsersUseCase } from './use-cases/command/create-users.usecase';
+import { FindAllUsersUseCase } from './use-cases/query/find-all-users.usecase';
+import { FindOneUsersUseCase } from './use-cases/query/find-one-users.usecase';
+import { UpdateUsersUseCase } from './use-cases/command/update-users.usecase';
+import { RemoveUsersUseCase } from './use-cases/command/remove-users.usecase';
+import { CreateManyUsers } from './use-cases/command/create-many-users.usecase';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly userRepository: UserRepository,
+    private readonly createManyUsersUseCase: CreateManyUsers,
+    private readonly createUserUseCase: CreateUsersUseCase,
+    private readonly findAllUsersUseCase: FindAllUsersUseCase,
+    private readonly findOneUsersUseCase: FindOneUsersUseCase,
+    private readonly updateUsersUseCase: UpdateUsersUseCase,
+    private readonly removeUsersUseCase: RemoveUsersUseCase,
   ) { }
 
-  async _validateIndentificationNumber(identityDocument: string, email?: string): Promise<boolean> {
-    const user = await this.userRepository.findOne({
-      where: [
-        { identityDocument },
-        { email: email || '' }
-      ]
-    });
-    if (user) {
-      throw new HttpException('La identificación o el email ya existe', 422);
-    }
-    return true;
-  }
 
   async createMany(createUserDtos: CreateUserDto[]): Promise<User[]> {
-    for (const dto of createUserDtos) {
-      await this._validateIndentificationNumber(dto.identityDocument, dto.email);
-    }
-
-    // Crear instancias de entidad para cada DTO
-    const users = createUserDtos.map(dto => this.userRepository.create(dto));
-
-    // Guardar todas las entidades en la base de datos
-    return this.userRepository.save(users);
-
+    return this.createManyUsersUseCase.execute(createUserDtos);
   }
 
-  // Mantener el método create para compatibilidad con API existente
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const users = await this.createMany([createUserDto]);
-    return users[0]; // Devolver el primer (y único) usuario creado
-
+    return this.createUserUseCase.execute(createUserDto);
   }
 
   async findAll(q: GetUserDto) {
-    const { page, limit } = q;
-    const pagination = Pagination.query({ page, limit });
-    const [rows, total] = await this.userRepository.findAndCount({
-      ...pagination
-    })
-
-    return Pagination.get(rows, page, limit, total);
-
+    return this.findAllUsersUseCase.execute(q);
   }
 
   async findOne(id: string): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-    }
-    return user;
+    return this.findOneUsersUseCase.execute(id);
   }
 
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id);
-    this.userRepository.merge(user, updateUserDto);
-    return this.userRepository.save(user);
+    return this.updateUsersUseCase.execute(id, updateUserDto);
   }
 
   async remove(id: string): Promise<{ message: string; user: User }> {
-    const user = await this.findOne(id);
-    await this.userRepository.softDelete(user);
-
-    return {
-      message: 'Usuario eliminado correctamente',
-      user
-    }
+    return this.removeUsersUseCase.execute(id);
   }
 
 
