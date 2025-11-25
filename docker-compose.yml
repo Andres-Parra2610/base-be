@@ -5,24 +5,24 @@ services:
       - ./src:/usr/src/app/src
     ports:
       - '3000:3000'
-    container_name: financial-backend
+    container_name: base-backend
     command: pnpm run start:dev
     environment:
       - PORT=3000
       - NODE_ENV=development
-      - DATABASE_HOST=financial-db
+      - DATABASE_HOST=base-db
       - DATABASE_PORT=5432
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=postgres
-      - DATABASE_NAME=financial
+      - DATABASE_NAME=base
       - JWT_SECRET=secret
       - JWT_REFRESH_TOKEN=refresh_token
     depends_on:
-      - financial-db
+      - base-db
 
   #================= Database =================
 
-  financial-db:
+  base-db:
     image: postgres:17.0-alpine
     restart: always
     ports:
@@ -32,4 +32,4 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=financial
+      - POSTGRES_DB=base
