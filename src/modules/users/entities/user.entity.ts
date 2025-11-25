@@ -22,7 +22,7 @@ export class User extends Base {
   @Index('idx_email', { unique: true })
   email: string;
 
-  @Column({ name: 'password', type: 'text' })
+  @Column({ name: 'password', type: 'text', nullable: true })
   password: string;
 
   @Column({ name: 'state_id', type: 'uuid', nullable: true })
@@ -30,9 +30,6 @@ export class User extends Base {
 
   @Column({ name: 'city_id', type: 'uuid', nullable: true })
   cityId: string;
-
-  @Column({ type: 'boolean', name: 'is_staff', default: false })
-  isStaff: boolean;
 
   /* Relations */
   @ManyToOne(() => State, { eager: true, nullable: true })
