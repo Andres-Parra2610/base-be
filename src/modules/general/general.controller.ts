@@ -5,6 +5,11 @@ import { GeneralService } from './general.service';
 export class GeneralController {
   constructor(private readonly generalService: GeneralService) { }
 
+  @Get('bcv')
+  async findLastBCV() {
+    return await this.generalService.findLastBCV();
+  }
+
   @Get('states')
   async findAllStates(@Query('id', new ParseUUIDPipe({ version: '4', optional: true })) id?: string) {
     return await this.generalService.findAllStates(id);

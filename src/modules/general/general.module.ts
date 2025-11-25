@@ -4,6 +4,7 @@ import { GeneralController } from './general.controller';
 import { DatabaseModule } from '../../database/database.module';
 import { FindAllCitiesUseCase } from './use-cases/query/find-cities.usecase';
 import { FindAllStatesUseCase } from './use-cases/query/find-states.usecase';
+import { FindLastBCVUseCase } from './use-cases/query/find-bcv.usecase';
 
 @Module({
   imports: [DatabaseModule],
@@ -12,6 +13,7 @@ import { FindAllStatesUseCase } from './use-cases/query/find-states.usecase';
     GeneralService,
     FindAllCitiesUseCase,
     FindAllStatesUseCase,
+    FindLastBCVUseCase,
   ],
 })
 export class GeneralModule { }
