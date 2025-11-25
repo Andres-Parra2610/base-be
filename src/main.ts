@@ -9,7 +9,7 @@ import { AllExceptionsFilter } from './core/exceptions/exception-filter';
 import { initializeTransactionalContext, StorageDriver } from 'typeorm-transactional';
 
 async function bootstrap() {
-  const logger = new Logger('Base Backend')
+  const logger = new Logger('Financial api')
   initializeTransactionalContext({ storageDriver: StorageDriver.ASYNC_LOCAL_STORAGE });
 
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -30,7 +30,7 @@ async function bootstrap() {
     }),
   )
 
-  logger.log(`Base Backend is running on port ${env.PORT}`);
+  logger.log(`Financial api is running on port ${env.PORT}`);
   await app.listen(env.PORT);
 }
 void bootstrap();  
