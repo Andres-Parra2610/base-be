@@ -6,11 +6,9 @@ import { env } from './config/env';
 import { Logger } from '@nestjs/common';
 import { globalValidationExceptionFactory } from './core/exceptions/exception-factory';
 import { AllExceptionsFilter } from './core/exceptions/exception-filter';
-import { initializeTransactionalContext, StorageDriver } from 'typeorm-transactional';
 
 async function bootstrap() {
   const logger = new Logger('Base Backend')
-  initializeTransactionalContext({ storageDriver: StorageDriver.ASYNC_LOCAL_STORAGE });
 
   const app = await NestFactory.create(AppModule, { cors: true });
   app.use(helmet({
