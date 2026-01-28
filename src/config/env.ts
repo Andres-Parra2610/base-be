@@ -1,6 +1,9 @@
 import 'dotenv/config'
 
 import * as joi from 'joi'
+import { LogLevel, VALID_LOG_LEVELS } from '@/shared/generals/logger/logger.types'
+
+
 
 interface Envs {
   NODE_ENV: string
@@ -12,6 +15,7 @@ interface Envs {
   DATABASE_NAME: string
   JWT_SECRET: string
   JWT_REFRESH_TOKEN: string
+  LOGGER_LEVEL: LogLevel[]
 }
 const envSchema = joi
   .object({
@@ -24,6 +28,19 @@ const envSchema = joi
     DATABASE_NAME: joi.string().required(),
     JWT_SECRET: joi.string().required(),
     JWT_REFRESH_TOKEN: joi.string().required(),
+    LOGGER_LEVEL: joi.string()
+      .optional()
+      .default('log')
+      .custom((value, helpers) => {
+        const levels = value.split(',').map((item: string) => item.trim());
+        const hasInvalidLevel = levels.some((level: string) => 
+          !(VALID_LOG_LEVELS as readonly string[]).includes(level)
+        );
+        if (hasInvalidLevel) {
+          throw new Error(`Invalid log level. Allowed: ${VALID_LOG_LEVELS.join(', ')}`);
+        }
+        return levels;
+      })
   })
   .unknown(true)
 
@@ -38,6 +55,7 @@ const { error, value } = envSchema.validate({
   DATABASE_NAME: process.env.DATABASE_NAME,
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_REFRESH_TOKEN: process.env.JWT_REFRESH_TOKEN,
+  LOGGER_LEVEL: process.env.LOGGER_LEVEL,
 })
 if (error) throw new Error('Config validation issue ' + error.message)
 

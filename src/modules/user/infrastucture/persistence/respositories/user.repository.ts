@@ -1,17 +1,19 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { UserEntity } from "../entities/user.entity";
 import { IUserRepository } from "../../../domain/ports/user-repository.port";
 import { UserModel } from "../../../domain/models/user.model";
-import { InjectRepository } from '@nestjs/typeorm';
 import { UserMapper } from "../mappers/user.mapper";
 
 @Injectable()
 export class UserRepository implements IUserRepository {
+    private readonly repository: Repository<UserEntity>;
     constructor(
-        @InjectRepository(UserEntity)
-        private readonly repository: Repository<UserEntity>,
-    ) {}
+        @Inject('DATA_SOURCE')
+        private readonly dataSource: DataSource
+    ) {
+        this.repository = this.dataSource.getRepository(UserEntity);
+    }
 
     async create(user: UserModel): Promise<UserModel> {
         const persistenceModel = UserMapper.toEntity(user);
@@ -29,7 +31,7 @@ export class UserRepository implements IUserRepository {
         if (!entity) return null;
         return UserMapper.toDomain(entity);
     }
-    
+
     async findById(id: string): Promise<UserModel | null> {
         const entity = await this.repository.findOne({ where: { id } });
         if (!entity) return null;

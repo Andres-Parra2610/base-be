@@ -8,7 +8,6 @@ import { globalValidationExceptionFactory } from './core/exceptions/exception-fa
 import { AllExceptionsFilter } from './core/exceptions/exception-filter';
 
 async function bootstrap() {
-  const logger = new Logger('Base Backend')
 
   const app = await NestFactory.create(AppModule, { cors: true });
   app.use(helmet({
@@ -27,6 +26,9 @@ async function bootstrap() {
       exceptionFactory: globalValidationExceptionFactory,
     }),
   )
+
+  const logger = app.get(Logger)
+  app.useLogger(logger)
 
   logger.log(`Base Backend is running on port ${env.PORT}`);
   await app.listen(env.PORT);
