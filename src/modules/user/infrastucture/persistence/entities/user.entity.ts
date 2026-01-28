@@ -1,7 +1,9 @@
 import { BaseEntity } from '@/src/shared/infrastructure/persistent/typeorm/entity/base-entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index, Unique } from 'typeorm';
 
 @Entity({ name: 'users' })
+@Unique('UQ_user_email', ['email'])
+@Index('IDX_user_email_fullname', ['email', 'fullName'])
 export class UserEntity extends BaseEntity {
   @Column({ name: 'full_name', nullable: false })
   fullName: string;

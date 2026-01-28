@@ -2,7 +2,7 @@ import { CreateUserUseCase } from '../../application/use-cases/create-user.useca
 import { Body, Controller, Post } from '@nestjs/common';
 import { CreateUserHttpDto } from './dto/create-user.http.dto';
 
-@Controller('users')
+@Controller('user')
 export class UserController {
   constructor(private readonly createUserUseCase: CreateUserUseCase) {}
 
