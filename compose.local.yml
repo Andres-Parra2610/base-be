@@ -1,0 +1,40 @@
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile.local
+      args:
+        - PORT=${PORT}
+    volumes:
+      - ./src:/usr/src/app/src
+    ports:
+      - ${PORT}:${PORT}
+    env_file:
+      - .env
+    container_name: base-backend
+    environment:
+      - PORT=${PORT}
+      - NODE_ENV=development
+      - DATABASE_HOST=base-db
+      - DATABASE_PORT=5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=base
+      - JWT_SECRET=secret
+      - JWT_REFRESH_TOKEN=refresh_token
+    depends_on:
+      - base-db
+
+  #================= Database =================
+
+  base-db:
+    image: postgres:17.0-alpine
+    restart: always
+    ports:
+      - '6000:5432'
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=base
