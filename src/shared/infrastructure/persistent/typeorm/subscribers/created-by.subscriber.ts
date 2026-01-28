@@ -1,11 +1,10 @@
 import { EntitySubscriberInterface, EventSubscriber, InsertEvent, UpdateEvent } from 'typeorm';
 import { ClsServiceManager } from 'nestjs-cls';
-import { Base } from 'src/shared/entities/base-entity';
 
 @EventSubscriber()
-export class CreatedBySubscriber implements EntitySubscriberInterface<Base> {
+export class CreatedBySubscriber implements EntitySubscriberInterface {
 
-  listenTo() {
+  /* listenTo() {
     return Base;
   }
 
@@ -28,5 +27,5 @@ export class CreatedBySubscriber implements EntitySubscriberInterface<Base> {
     const cls = ClsServiceManager.getClsService();
     const user = cls?.get('user');
     return user;
-  }
+  } */
 }

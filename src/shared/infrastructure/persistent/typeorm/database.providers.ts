@@ -1,6 +1,5 @@
 import { env } from 'src/config/env';
 import { DataSource } from 'typeorm';
-import { addTransactionalDataSource } from 'typeorm-transactional';
 
 const isProduction = env.NODE_ENV === 'production';
 
@@ -25,7 +24,7 @@ export const databaseProviders = [
   {
     provide: 'DATA_SOURCE',
     useFactory: async () => {
-      return addTransactionalDataSource(dataSource).initialize();
+      return dataSource.initialize();
     },
   },
 ];
