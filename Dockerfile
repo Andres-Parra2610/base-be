@@ -1,12 +1,19 @@
-FROM node:20-alpine3.19
+FROM node:22-alpine
+
+RUN apk update && apk add --no-cache libc6-compat dumb-init
+RUN corepack enable && corepack prepare pnpm@latest --activate
+ENV PNPM_HOME="/pnpm"
+ENV PATH=$PNPM_HOME:$PATH
 
 WORKDIR /usr/src/app
 
-# Install pnpm
-RUN npm install -g pnpm
+COPY . /usr/src/app/
+RUN pnpm install --frozen-lockfile
 
-COPY package.json pnpm-lock.yaml ./
+RUN pnpm run build && \
+    pnpm prune --production
 
-RUN pnpm install
+EXPOSE 3000
 
-COPY . .
+CMD ["dumb-init", "node", "dist/main.js"]
+
