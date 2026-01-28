@@ -1,12 +1,11 @@
-import { User } from "src/modules/users/entities/user.entity";
+/* import { User } from "src/modules/users/entities/user.entity"; */
 import { DataSource } from "typeorm";
 import * as bcrypt from 'bcryptjs'
 
 
 export const userSeeder = async (source: DataSource) => {
-  const repository = source.getRepository(User);
+  /* const repository = source.getRepository(User);
 
-  /* Eliminar usuarios anteriores */
   await repository.delete({
     email: 'admin@admin.com'
   });
@@ -19,7 +18,7 @@ export const userSeeder = async (source: DataSource) => {
       email: 'admin@admin.com',
       password: bcrypt.hashSync('123456', 10),
     }
-  ]);
+  ]); */
 
 
 }

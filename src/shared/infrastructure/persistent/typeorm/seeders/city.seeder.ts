@@ -1,5 +1,5 @@
-import { City } from 'src/shared/entities/city.entity';
-import { State } from 'src/shared/entities/state.entity';
+/* import { City } from 'src/shared/entities/city.entity';
+import { State } from 'src/shared/entities/state.entity'; */
 import { DataSource } from 'typeorm';
 
 const citiesByState = {
@@ -31,7 +31,7 @@ const citiesByState = {
 };
 
 export const citySeeder = async (source: DataSource) => {
-  const stateRepo = source.getRepository(State);
+  /* const stateRepo = source.getRepository(State);
   const cityRepo = source.getRepository(City);
 
   await cityRepo.deleteAll()
@@ -60,5 +60,5 @@ export const citySeeder = async (source: DataSource) => {
     missingStates.forEach(state => console.warn(`- ${state}`));
   }
 
-  await cityRepo.insert(allCities);
+  await cityRepo.insert(allCities); */
 };

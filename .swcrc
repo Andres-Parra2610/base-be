@@ -13,7 +13,12 @@
     },
     "baseUrl": "./",
     "paths": {
-      "@/src/*": ["src/*"]
+      "@/src/*": ["src/*"],
+      "@/config/*": ["src/config/*"],
+      "@/core/*": ["src/core/*"],
+      "@/modules/*": ["src/modules/*"],
+      "@/shared/*": ["src/shared/*"],
+      "@/utils/*": ["src/utils/*"]
     },
     "target": "esnext"
   },

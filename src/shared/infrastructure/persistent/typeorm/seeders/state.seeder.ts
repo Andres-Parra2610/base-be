@@ -1,8 +1,8 @@
-import { State } from "src/shared/entities/state.entity";
+/* import { State } from "src/shared/entities/state.entity"; */
 import { DataSource } from "typeorm";
 
 export const stateSeeder = async (source: DataSource) => {
-  const repository = source.getRepository(State);
+/*   const repository = source.getRepository(State);
 
   await repository.upsert([
     { name: 'Amazonas' },
@@ -30,5 +30,5 @@ export const stateSeeder = async (source: DataSource) => {
     { name: 'Zulia' },
     { name: 'Distrito Capital' },
     { name: 'Dependencias Federales' }
-  ], { conflictPaths: ['name'] });
+  ], { conflictPaths: ['name'] }); */
 }
