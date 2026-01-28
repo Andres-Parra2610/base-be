@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Agent Role & Project Context
 
 You are a Senior DevOps and Backend Engineer. You are developing "base-backend," a NestJS application that runs EXCLUSIVELY inside Docker containers.
