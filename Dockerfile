@@ -4,6 +4,7 @@ RUN apk update && apk add --no-cache libc6-compat dumb-init
 RUN corepack enable && corepack prepare pnpm@latest --activate
 ENV PNPM_HOME="/pnpm"
 ENV PATH=$PNPM_HOME:$PATH
+ENV CI=true
 
 WORKDIR /usr/src/app
 
