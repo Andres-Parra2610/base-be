@@ -1,5 +1,5 @@
-import { env } from "@/src/config/env";
-import { Global, Logger, Module, Provider } from "@nestjs/common";
+import { env } from '@/src/config/env';
+import { Global, Logger, Module, Provider } from '@nestjs/common';
 
 const loggerProvider: Provider = {
   provide: Logger,

@@ -10,10 +10,7 @@ interface PaginationQueryProps {
 /**
  * Retorna skip y take a partir de page y limit
  */
-export const query = ({
-  page = 1,
-  limit = Constants.PER_PAGE,
-}: PaginationQueryProps) => {
+export const query = ({ page = 1, limit = Constants.PER_PAGE }: PaginationQueryProps) => {
   return {
     skip: (page - 1) * limit,
     take: limit,
@@ -23,12 +20,7 @@ export const query = ({
 /**
  * Devuelve un objeto paginado con metadata
  */
-export const get = <T = any>(
-  data: T[],
-  page = 1,
-  perPage = Constants.PER_PAGE,
-  total = 0,
-) => ({
+export const get = <T = any>(data: T[], page = 1, perPage = Constants.PER_PAGE, total = 0) => ({
   data,
   page,
   perPage,

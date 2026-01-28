@@ -9,19 +9,20 @@ import { AllExceptionsFilter } from './core/exceptions/exception-filter';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 
 async function bootstrap() {
-
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({
       logger: true,
     }),
     {
-      cors: true
-    }
+      cors: true,
+    },
   );
-  app.use(helmet({
-    crossOriginResourcePolicy: { policy: 'cross-origin' }
-  }));
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
 
   // Set global prefix for all routes
   app.setGlobalPrefix('api/v1');
@@ -34,12 +35,12 @@ async function bootstrap() {
       transform: true,
       exceptionFactory: globalValidationExceptionFactory,
     }),
-  )
+  );
 
-  const logger = app.get(Logger)
-  app.useLogger(logger)
+  const logger = app.get(Logger);
+  app.useLogger(logger);
 
   logger.log(`Base Backend is running on port ${env.PORT}`);
   await app.listen(env.PORT, '0.0.0.0');
 }
-void bootstrap();  
+void bootstrap();

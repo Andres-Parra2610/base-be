@@ -1,18 +1,18 @@
-import { IsBoolean, IsEmail, IsOptional, IsString, MinLength } from "class-validator";
+import { IsBoolean, IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class CreateUserHttpDto {
-    @IsString()
-    @MinLength(3)
-    fullName: string;
+  @IsString()
+  @MinLength(3)
+  fullName: string;
 
-    @IsEmail()
-    email: string;
+  @IsEmail()
+  email: string;
 
-    @IsString()
-    @MinLength(6)
-    password: string;
+  @IsString()
+  @MinLength(6)
+  password: string;
 
-    @IsBoolean()
-    @IsOptional()
-    isStaff: boolean = false;
+  @IsBoolean()
+  @IsOptional()
+  isStaff: boolean = false;
 }

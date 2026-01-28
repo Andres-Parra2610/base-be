@@ -1,3 +1,3 @@
 export interface IUuidGenerationRepository {
-    generate(): string;
+  generate(): string;
 }

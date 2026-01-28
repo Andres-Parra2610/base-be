@@ -11,7 +11,7 @@ import { APP_MODULES } from './modules';
       global: true,
       middleware: {
         mount: true,
-      }
+      },
     }),
   ],
   providers: [
@@ -19,6 +19,6 @@ import { APP_MODULES } from './modules';
       provide: APP_INTERCEPTOR,
       useClass: RequestInterceptor,
     },
-  ]
+  ],
 })
-export class AppModule { }
+export class AppModule {}

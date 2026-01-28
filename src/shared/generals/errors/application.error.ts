@@ -6,8 +6,8 @@ export class ApplicationError extends Error {
 
   constructor(code: string, message: string, statusCode = 500) {
     super(message);
-    this.code = code; 
-    this.statusCode = statusCode; 
+    this.code = code;
+    this.statusCode = statusCode;
     this.name = 'ApplicationError';
     this.timestamp = new Date();
   }

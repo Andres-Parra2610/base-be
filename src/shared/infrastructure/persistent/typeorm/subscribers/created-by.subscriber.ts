@@ -3,7 +3,6 @@ import { ClsServiceManager } from 'nestjs-cls';
 
 @EventSubscriber()
 export class CreatedBySubscriber implements EntitySubscriberInterface {
-
   /* listenTo() {
     return Base;
   }

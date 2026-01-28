@@ -1,7 +1,6 @@
 /* import { User } from "src/modules/users/entities/user.entity"; */
-import { DataSource } from "typeorm";
-import * as bcrypt from 'bcryptjs'
-
+import { DataSource } from 'typeorm';
+import * as bcrypt from 'bcryptjs';
 
 export const userSeeder = async (source: DataSource) => {
   /* const repository = source.getRepository(User);
@@ -19,6 +18,4 @@ export const userSeeder = async (source: DataSource) => {
       password: bcrypt.hashSync('123456', 10),
     }
   ]); */
-
-
-}
+};

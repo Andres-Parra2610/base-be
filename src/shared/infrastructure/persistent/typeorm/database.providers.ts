@@ -7,7 +7,7 @@ const isProduction = env.NODE_ENV === 'production';
 // Resolves to 'src' (development) or 'dist' (production)
 // path: /src/shared/infrastructure/persistent/typeorm/
 const baseDir = join(__dirname, '../../../../');
-console.log(baseDir)
+console.log(baseDir);
 
 export const dataSource = new DataSource({
   type: 'postgres',
@@ -21,9 +21,11 @@ export const dataSource = new DataSource({
   subscribers: [join(__dirname, 'subscribers', '*{.ts,.js}')],
   migrationsTableName: 'migrations',
   synchronize: false,
-  ssl: isProduction ? {
-    rejectUnauthorized: false,
-  } : false,
+  ssl: isProduction
+    ? {
+        rejectUnauthorized: false,
+      }
+    : false,
 });
 
 export const databaseProviders = [
