@@ -10,19 +10,13 @@ export class CreateUserUseCase {
     ) {}
 
     async execute(createUserDto: CreateUserDto): Promise<UserModel> {
-        const user = new UserModel(
-            this.uuidGenerationRepository.generate(),
-            new Date(),
-            new Date(),
-            null,
-            null,
-            null,
-            null,
-            createUserDto.fullName,
-            createUserDto.email,
-            createUserDto.password,
-            createUserDto.isStaff,
-        );
+        const user = new UserModel({
+            id: this.uuidGenerationRepository.generate(),
+            fullName: createUserDto.fullName,
+            email: createUserDto.email,
+            password: createUserDto.password,
+            isStaff: createUserDto.isStaff,
+        });
         return this.userRepository.create(user);
     }
 }

@@ -1,7 +1,7 @@
 export interface BaseModelParams {
     id: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
     deletedAt?: Date;
     createdBy?: string;
     updatedBy?: string;
@@ -18,6 +18,10 @@ export class BaseModel {
     deletedBy?: string;
 
     constructor(params: BaseModelParams) {
-        Object.assign(this, params);
+        Object.assign(this, {
+            ...params,
+            createdAt: params.createdAt || new Date(),
+            updatedAt: params.updatedAt || new Date(),
+        });
     }
 }
