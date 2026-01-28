@@ -19,3 +19,4 @@ services:
       - DATABASE_NAME=base
       - JWT_SECRET=secret
       - JWT_REFRESH_TOKEN=refresh_token
+      - LOGGER_LEVEL=${LOGGER_LEVEL}

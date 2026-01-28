@@ -3,6 +3,7 @@ import { UserRepository } from "./infrastucture/persistence/respositories/user.r
 import { CreateUserUseCase } from "./application/use-cases/create-user.usecase";
 import { UuidGenerationService } from "@/src/shared/infrastructure/services/uuid-generator.service";
 import { DatabaseModule } from "@/src/shared/infrastructure/persistent/typeorm/database.module";
+import { UserController } from "./infrastucture/http/user.controller";
 
 
 @Module({
@@ -26,8 +27,11 @@ import { DatabaseModule } from "@/src/shared/infrastructure/persistent/typeorm/d
             inject: ['UserRepository', 'UuidGenerationService']
         }
     ],
+    controllers: [
+        UserController
+    ],
     exports: [
         CreateUserUseCase
-    ]
+    ],
 })
 export class UserModule {}
