@@ -6,10 +6,19 @@ import { env } from './config/env';
 import { Logger } from '@nestjs/common';
 import { globalValidationExceptionFactory } from './core/exceptions/exception-factory';
 import { AllExceptionsFilter } from './core/exceptions/exception-filter';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 
 async function bootstrap() {
 
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter({
+      logger: true,
+    }),
+    {
+      cors: true
+    }
+  );
   app.use(helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' }
   }));
@@ -31,6 +40,6 @@ async function bootstrap() {
   app.useLogger(logger)
 
   logger.log(`Base Backend is running on port ${env.PORT}`);
-  await app.listen(env.PORT);
+  await app.listen(env.PORT, '0.0.0.0');
 }
 void bootstrap();  
