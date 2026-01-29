@@ -1,7 +1,7 @@
 import { IUserRepository } from '../../domain/ports/user-repository.port';
 import { UserModel } from '../../domain/models/user.model';
 import { CreateUserDto } from '../dtos/create-user.dto';
-import { generateUuidV4 } from '@/src/shared/generals/uuid/generate-uuid';
+import { generateUuidV4 } from '@/src/utils/uuid/generate-uuid';
 
 export class CreateUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}

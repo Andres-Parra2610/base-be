@@ -1,7 +1,7 @@
 import 'dotenv/config';
 
 import * as joi from 'joi';
-import { LogLevel, VALID_LOG_LEVELS } from '@/shared/generals/logger/logger.types';
+import { LogLevel, VALID_LOG_LEVELS } from '@/src/utils/logger/logger.types';
 
 interface Envs {
   NODE_ENV: string;
