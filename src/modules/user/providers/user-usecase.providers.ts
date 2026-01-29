@@ -2,6 +2,7 @@ import { Provider } from '@nestjs/common';
 import { CreateUserUseCase } from '../application/use-cases/create-user.usecase';
 import { UpdateUserUseCase } from '../application/use-cases/update-user.usecase';
 import { DeleteUserUseCase } from '../application/use-cases/delete-user.usecase';
+import { FindOneUserUseCase } from '../application/use-cases/find-one-user.usecase';
 // ... otros use cases
 
 export const userUseCaseProviders: Provider[] = [
@@ -18,6 +19,11 @@ export const userUseCaseProviders: Provider[] = [
   {
     provide: DeleteUserUseCase,
     useFactory: (repo) => new DeleteUserUseCase(repo),
+    inject: ['UserRepository'],
+  },
+  {
+    provide: FindOneUserUseCase,
+    useFactory: (repo) => new FindOneUserUseCase(repo),
     inject: ['UserRepository'],
   },
 ];
