@@ -8,7 +8,7 @@ export interface BaseModelParams {
   deletedBy?: string;
 }
 
-export class BaseModel {
+export abstract class BaseModel<T extends BaseModelParams> {
   id: string;
   createdAt: Date;
   updatedAt: Date;
@@ -17,11 +17,22 @@ export class BaseModel {
   updatedBy?: string;
   deletedBy?: string;
 
-  constructor(params: BaseModelParams) {
+  constructor(params: T) {
     Object.assign(this, {
       ...params,
       createdAt: params.createdAt || new Date(),
       updatedAt: params.updatedAt || new Date(),
     });
+  }
+
+  public cloneWith(changes: Partial<T>): this {
+    const Constructor = this.constructor as new (params: T) => this;
+    const newParams = {
+      ...this,
+      ...changes,
+      updatedAt: new Date(),
+    } as unknown as T;
+
+    return new Constructor(newParams);
   }
 }

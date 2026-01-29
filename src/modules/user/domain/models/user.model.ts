@@ -9,7 +9,7 @@ interface UserModelParams extends BaseModelParams {
   isStaff: boolean;
 }
 
-export class UserModel extends BaseModel {
+export class UserModel extends BaseModel<UserModelParams> {
   fullName: string;
   email: string;
   password?: string;
