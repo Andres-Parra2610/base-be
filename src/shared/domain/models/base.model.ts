@@ -35,4 +35,8 @@ export abstract class BaseModel<T extends BaseModelParams> {
 
     return new Constructor(newParams);
   }
+
+  public toObject(): T {
+    return this as unknown as T;
+  }
 }

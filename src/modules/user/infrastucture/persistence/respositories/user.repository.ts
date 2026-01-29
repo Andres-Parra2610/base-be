@@ -51,7 +51,11 @@ export class UserRepository implements IUserRepository {
   }
 
   @HandleDbErrors()
-  async delete(id: string): Promise<void> {
-    await this.repository.softDelete(id);
+  async delete(id: string, hard: boolean = false): Promise<void> {
+    if (hard) {
+      await this.repository.delete(id);
+    } else {
+      await this.repository.softDelete(id);
+    }
   }
 }
