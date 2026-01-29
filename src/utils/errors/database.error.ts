@@ -13,7 +13,7 @@ export class DatabaseError extends Error {
 // 1. Violación de Unicidad (Ej: Email duplicado) -> Suele ser 409 Conflict
 export class UniqueConstraintError extends DatabaseError {
   constructor(detail: string = 'Registro duplicado') {
-    super(`Violación de restricción única: ${detail}`, true);
+    super(`${detail}`, true);
     this.name = 'UniqueConstraintError';
   }
 }

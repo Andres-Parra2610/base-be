@@ -6,6 +6,7 @@ import {
 } from '@/src/utils/errors/database.error';
 import { QueryFailedError } from 'typeorm';
 import { PostgresErrorCode } from '../../postgress/postgress-errors';
+import { CONSTRAINT_MESSAGES } from '../../postgress/postgress-constrains';
 
 export class TypeOrmErrorMapper {
   static map(error: unknown): never {
@@ -14,12 +15,20 @@ export class TypeOrmErrorMapper {
       throw new DatabaseError('Error de base de datos desconocido', false, error);
     }
 
-    const driverError = error.driverError as { code: string; detail: string; table: string };
+    const driverError = error.driverError as {
+      code: string;
+      detail: string;
+      table: string;
+      constraint?: string;
+    };
     const code = driverError.code;
 
     switch (code) {
       case PostgresErrorCode.UniqueViolation:
-        throw new UniqueConstraintError(driverError.detail);
+        if (driverError.constraint && CONSTRAINT_MESSAGES[driverError.constraint]) {
+          throw new UniqueConstraintError(CONSTRAINT_MESSAGES[driverError.constraint]);
+        }
+        throw new UniqueConstraintError('El registro ya existe');
 
       case PostgresErrorCode.ForeignKeyViolation:
         throw new ForeignKeyConstraintError(driverError.detail);
