@@ -8,16 +8,20 @@ export class CreateUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(createUserDto: CreateUserDto): Promise<UserModel> {
-    UserModel.validatePassword(createUserDto.password || '');
+    try {
+      UserModel.validatePassword(createUserDto.password || '');
 
-    const user = new UserModel({
-      id: generateUuidV4(),
-      fullName: createUserDto.fullName,
-      email: createUserDto.email,
-      password: hashPassword(createUserDto.password || ''),
-      isStaff: createUserDto.isStaff,
-    });
+      const user = new UserModel({
+        id: generateUuidV4(),
+        fullName: createUserDto.fullName,
+        email: createUserDto.email,
+        password: hashPassword(createUserDto.password || ''),
+        isStaff: createUserDto.isStaff,
+      });
 
-    return this.userRepository.create(user);
+      return this.userRepository.create(user);
+    } catch (error) {
+      throw error;
+    }
   }
 }

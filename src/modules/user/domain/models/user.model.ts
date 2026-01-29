@@ -1,4 +1,5 @@
 import { BaseModel, BaseModelParams } from '@/src/shared/domain/models/base.model';
+import { DomainError } from '@/src/utils/errors/domain.error';
 import { validateRegex } from '@/src/utils/regex/validatorHelper.regex';
 
 interface UserModelParams extends BaseModelParams {
@@ -18,6 +19,7 @@ export class UserModel extends BaseModel {
     super(params);
 
     this.validateEmail(params.email);
+    this.validateFullName(params.fullName);
 
     this.fullName = params.fullName;
     this.email = params.email;
@@ -27,11 +29,16 @@ export class UserModel extends BaseModel {
 
   private validateEmail(email: string) {
     const isValid = validateRegex(email, 'email');
-    if (isValid) throw new Error(isValid);
+    if (isValid) throw new DomainError(isValid);
+  }
+
+  private validateFullName(fullName: string) {
+    const isValid = validateRegex(fullName, 'fullName');
+    if (isValid) throw new DomainError(isValid);
   }
 
   static validatePassword(password: string) {
     const isValid = password.length >= 6;
-    if (!isValid) throw new Error('La contraseña debe tener al menos 6 caracteres');
+    if (!isValid) throw new DomainError('La contraseña debe tener al menos 6 caracteres');
   }
 }

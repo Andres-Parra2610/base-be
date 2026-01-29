@@ -1,11 +1,21 @@
-import { IsBoolean, IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import { fullNameRegex } from '@/src/utils/regex/validators.regex';
+import {
+  IsBoolean,
+  IsDefined,
+  IsEmail,
+  IsOptional,
+  IsString,
+  Matches,
+  MinLength,
+} from 'class-validator';
 
 export class CreateUserHttpDto {
   @IsString()
   @MinLength(3)
+  @Matches(fullNameRegex)
   fullName: string;
 
-  @IsEmail()
+  @IsDefined()
   email: string;
 
   @IsString()

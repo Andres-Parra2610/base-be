@@ -11,7 +11,7 @@ export class UserMapper {
   static toDomain(userEntity: UserEntity): UserModel {
     return new UserModel({
       ...userEntity,
-      password: userEntity.password,
+      password: undefined,
     });
   }
 }

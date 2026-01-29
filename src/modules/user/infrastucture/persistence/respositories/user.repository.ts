@@ -4,6 +4,7 @@ import { UserEntity } from '../entities/user.entity';
 import { IUserRepository } from '../../../domain/ports/user-repository.port';
 import { UserModel } from '../../../domain/models/user.model';
 import { UserMapper } from '../mappers/user.mapper';
+import { DatabaseError } from '@/src/utils/errors/database.error';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -16,9 +17,14 @@ export class UserRepository implements IUserRepository {
   }
 
   async create(user: UserModel): Promise<UserModel> {
-    const persistenceModel = UserMapper.toEntity(user);
-    const savedEntity = await this.repository.save(persistenceModel);
-    return UserMapper.toDomain(savedEntity);
+    try {
+      const persistenceModel = UserMapper.toEntity(user);
+      const savedEntity = await this.repository.save(persistenceModel);
+      return UserMapper.toDomain(savedEntity);
+    } catch (error) {
+      console.log('Error al crear el usuario', error.code);
+      throw new DatabaseError('Error al crear el usuario');
+    }
   }
 
   async findAll(): Promise<UserModel[]> {
