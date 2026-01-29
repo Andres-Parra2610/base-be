@@ -7,12 +7,14 @@ import { Logger } from '@nestjs/common';
 import { globalValidationExceptionFactory } from './core/exceptions/exception-factory';
 import { AllExceptionsFilter } from './core/exceptions/exception-filter';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import qs from 'qs';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({
       logger: true,
+      querystringParser: (str) => qs.parse(str),
     }),
     {
       cors: true,
