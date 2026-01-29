@@ -1,10 +1,22 @@
 import { CreateUserUseCase } from '../../application/use-cases/create-user.usecase';
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserUseCase } from '../../application/use-cases/update-user.usecase';
 import { DeleteUserUseCase } from '../../application/use-cases/delete-user.usecase';
 import { FindOneUserUseCase } from '../../application/use-cases/find-one-user.usecase';
+import { FindAllUserUseCase } from '../../application/use-cases/find-all-user.usecase';
+import { QueryDto } from '@/src/utils/dto/pagination.dto';
 
 @Controller('user')
 export class UserController {
@@ -13,11 +25,16 @@ export class UserController {
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
     private readonly findOneUserUseCase: FindOneUserUseCase,
+    private readonly findAllUserUseCase: FindAllUserUseCase,
   ) {}
 
   @Post()
   async createUser(@Body() createUserDto: CreateUserDto) {
     return await this.createUserUseCase.execute(createUserDto);
+  }
+  @Get()
+  async findAllUser(@Query() queryDto: QueryDto) {
+    return await this.findAllUserUseCase.execute(queryDto);
   }
 
   @Get(':id')
