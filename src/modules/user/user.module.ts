@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UserRepository } from './infrastucture/persistence/respositories/user.repository';
 import { CreateUserUseCase } from './application/use-cases/create-user.usecase';
-import { UuidGenerationService } from '@/src/shared/infrastructure/services/uuid-generator.service';
 import { DatabaseModule } from '@/src/shared/infrastructure/persistent/typeorm/database.module';
 import { UserController } from './infrastucture/http/user.controller';
 
@@ -13,15 +12,11 @@ import { UserController } from './infrastucture/http/user.controller';
       useClass: UserRepository,
     },
     {
-      provide: 'UuidGenerationService',
-      useClass: UuidGenerationService,
-    },
-    {
       provide: CreateUserUseCase,
-      useFactory: (repo, uuidGenerator) => {
-        return new CreateUserUseCase(repo, uuidGenerator);
+      useFactory: (repo) => {
+        return new CreateUserUseCase(repo);
       },
-      inject: ['UserRepository', 'UuidGenerationService'],
+      inject: ['UserRepository'],
     },
   ],
   controllers: [UserController],
