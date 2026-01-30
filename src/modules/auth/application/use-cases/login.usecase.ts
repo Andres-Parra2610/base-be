@@ -11,7 +11,7 @@ export class LoginUseCase {
     private readonly findUserByEmailUseCase: FindUserByEmailUseCase,
   ) {}
 
-  async execute(dto: ILogin): Promise<{ token: string; user: UserModel }> {
+  async execute(dto: ILogin): Promise<{ token: string; refreshToken: string; user: UserModel }> {
     const user = await this.findUserByEmailUseCase.execute(dto.email, { withPassword: true });
     if (!user) {
       throw new ApplicationError('Usuario o contraseña incorrecta');
@@ -27,8 +27,14 @@ export class LoginUseCase {
       email: user.email,
     });
 
+    const refreshToken = this.repository.generateRefreshToken({
+      id: user.id,
+      email: user.email,
+    });
+
     return {
       token,
+      refreshToken,
       user: {
         ...user,
         password: undefined,
