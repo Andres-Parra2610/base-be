@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
-import { IUserRepository } from '../../../domain/ports/user-repository.port';
+import {
+  IFindUserByEmailOptions,
+  IUserRepository,
+} from '../../../domain/ports/user-repository.port';
 import { UserModel } from '../../../domain/models/user.model';
 import { UserMapper } from '../mappers/user.mapper';
 import { HandleDbErrors } from '@/src/core/decorators/errors/db-errors.decortator';
@@ -37,7 +40,7 @@ export class UserRepository implements IUserRepository {
 
     const [entities, total] = await queryBuilder.getManyAndCount();
     return {
-      data: entities.map(UserMapper.toDomain),
+      data: entities.map((entity) => UserMapper.toDomain(entity)),
       total,
       page: queryDto.page,
       limit: queryDto.limit,
@@ -45,7 +48,7 @@ export class UserRepository implements IUserRepository {
   }
 
   @HandleDbErrors()
-  async findByEmail(email: string): Promise<UserModel | null> {
+  async findByEmail(email: string, options?: IFindUserByEmailOptions): Promise<UserModel | null> {
     const entity = await this.repository.findOne({ where: { email } });
     if (!entity) return null;
     return UserMapper.toDomain(entity);

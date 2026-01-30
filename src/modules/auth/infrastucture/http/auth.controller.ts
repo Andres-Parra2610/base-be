@@ -9,7 +9,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { CreateAuthUseCase } from '../../application/use-cases/create-auth.usecase';
+import { CreateAuthUseCase } from '../../application/use-cases/login.usecase';
 import { FindAllAuthUseCase } from '../../application/use-cases/find-all-auth.usecase';
 import { FindOneAuthUseCase } from '../../application/use-cases/find-one-auth.usecase';
 import { UpdateAuthUseCase } from '../../application/use-cases/update-auth.usecase';

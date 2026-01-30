@@ -4,6 +4,7 @@ import { UpdateUserUseCase } from '../application/use-cases/update-user.usecase'
 import { DeleteUserUseCase } from '../application/use-cases/delete-user.usecase';
 import { FindOneUserUseCase } from '../application/use-cases/find-one-user.usecase';
 import { FindAllUserUseCase } from '../application/use-cases/find-all-user.usecase';
+import { FindUserByEmailUseCase } from '../application/use-cases/find-by-email.usecase';
 
 export const userUseCaseProviders: Provider[] = [
   {
@@ -29,6 +30,11 @@ export const userUseCaseProviders: Provider[] = [
   {
     provide: FindAllUserUseCase,
     useFactory: (repo) => new FindAllUserUseCase(repo),
+    inject: ['UserRepository'],
+  },
+  {
+    provide: FindUserByEmailUseCase,
+    useFactory: (repo) => new FindUserByEmailUseCase(repo),
     inject: ['UserRepository'],
   },
 ];

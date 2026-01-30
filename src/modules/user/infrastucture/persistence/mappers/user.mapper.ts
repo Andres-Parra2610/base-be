@@ -8,10 +8,11 @@ export class UserMapper {
     return entity;
   }
 
-  static toDomain(userEntity: UserEntity): UserModel {
+  static toDomain(userEntity: UserEntity, options?: { withPassword?: boolean }): UserModel {
+    const withPassword = options?.withPassword ?? false;
     return new UserModel({
       ...userEntity,
-      password: undefined,
+      password: withPassword ? userEntity.password : undefined,
     });
   }
 }
