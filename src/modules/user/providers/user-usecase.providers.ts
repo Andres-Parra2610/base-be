@@ -4,7 +4,6 @@ import { UpdateUserUseCase } from '../application/use-cases/update-user.usecase'
 import { DeleteUserUseCase } from '../application/use-cases/delete-user.usecase';
 import { FindOneUserUseCase } from '../application/use-cases/find-one-user.usecase';
 import { FindAllUserUseCase } from '../application/use-cases/find-all-user.usecase';
-// ... otros use cases
 
 export const userUseCaseProviders: Provider[] = [
   {
