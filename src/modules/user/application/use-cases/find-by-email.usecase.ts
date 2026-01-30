@@ -5,6 +5,7 @@ export class FindUserByEmailUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(email: string, options?: IFindUserByEmailOptions): Promise<UserModel | null> {
+    console.log(this.userRepository, 'here');
     return this.userRepository.findByEmail(email, options);
   }
 }

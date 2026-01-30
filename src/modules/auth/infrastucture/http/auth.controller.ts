@@ -7,7 +7,7 @@ export class AuthController {
   constructor(private readonly loginUseCase: LoginUseCase) {}
 
   @Post('login')
-  async create(@Body() dto: LoginAuthDto) {
+  async login(@Body() dto: LoginAuthDto) {
     return this.loginUseCase.execute(dto);
   }
 }

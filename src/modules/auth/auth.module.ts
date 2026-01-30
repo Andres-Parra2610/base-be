@@ -20,10 +20,6 @@ import { env } from '@/src/config/env';
       provide: 'TokenService',
       useClass: JwtTokenService,
     },
-    {
-      provide: 'FindUserByEmailUseCase',
-      useClass: FindUserByEmailUseCase,
-    },
     ...authUseCaseProviders,
   ],
   controllers: [AuthController],
