@@ -1,5 +1,18 @@
 # Base Backend Project
 
+<div align="center">
+
+![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
+![Fastify](https://img.shields.io/badge/fastify-%23000000.svg?style=for-the-badge&logo=fastify&logoColor=white)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![TypeORM](https://img.shields.io/badge/TypeORM-FE0C2F.svg?style=for-the-badge&logo=TypeORM&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![SWC](https://img.shields.io/badge/SWC-FFFFFF?style=for-the-badge&logo=swc&logoColor=F5D00E)
+![pnpm](https://img.shields.io/badge/pnpm-%234a4a4a.svg?style=for-the-badge&logo=pnpm&logoColor=f69220)
+
+</div>
+
 A production-ready, highly scalable backend starter template built with **NestJS**, **Fastify**, and **PostgreSQL**.
 
 This project is architected with **Hexagonal Architecture (Ports and Adapters)** and **Vertical Slicing** to ensure maintainability, testability, and separation of concerns. It is designed to run **exclusively inside Docker containers**, ensuring a consistent environment from development to production.
