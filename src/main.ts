@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import fastifyCookie from '@fastify/cookie';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
@@ -20,6 +21,9 @@ async function bootstrap() {
       cors: true,
     },
   );
+  await app.register(fastifyCookie as any, {
+    secret: env.JWT_SECRET,
+  });
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' },

@@ -17,7 +17,7 @@ export class LoginUseCase {
       throw new ApplicationError('Usuario o contraseña incorrecta');
     }
 
-    const isPasswordValid = comparePassword(dto.password, user.password!);
+    const isPasswordValid = await comparePassword(dto.password, user.password!);
     if (!isPasswordValid) {
       throw new ApplicationError('Usuario o contraseña incorrecta');
     }
