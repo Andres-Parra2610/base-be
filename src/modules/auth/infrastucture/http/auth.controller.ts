@@ -1,26 +1,13 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  Post,
-  Put,
-  Query,
-} from '@nestjs/common';
-import { CreateAuthUseCase } from '../../application/use-cases/login.usecase';
-import { FindAllAuthUseCase } from '../../application/use-cases/find-all-auth.usecase';
-import { FindOneAuthUseCase } from '../../application/use-cases/find-one-auth.usecase';
-import { UpdateAuthUseCase } from '../../application/use-cases/update-auth.usecase';
-import { DeleteAuthUseCase } from '../../application/use-cases/delete-auth.usecase';
-import { QueryDto } from '@/src/utils/dto/pagination.dto';
+import { Body, Controller, Post } from '@nestjs/common';
 import { LoginAuthDto } from './dto/create-auth.dto';
+import { LoginUseCase } from '../../application/use-cases/login.usecase';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly createUseCase: CreateAuthUseCase) {}
+  constructor(private readonly loginUseCase: LoginUseCase) {}
 
-  @Post()
-  async create(@Body() dto: LoginAuthDto) {}
+  @Post('login')
+  async create(@Body() dto: LoginAuthDto) {
+    return this.loginUseCase.execute(dto);
+  }
 }

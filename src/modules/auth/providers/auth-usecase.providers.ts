@@ -2,12 +2,13 @@ import { Provider } from '@nestjs/common';
 import { LoginUseCase } from '../application/use-cases/login.usecase';
 import { ITokenPort } from '../application/ports/token.port';
 import { IUserRepository } from '@/src/modules/user/domain/ports/user-repository.port';
+import { FindUserByEmailUseCase } from '../../user/application/use-cases/find-by-email.usecase';
 
 export const authUseCaseProviders: Provider[] = [
   {
     provide: LoginUseCase,
-    useFactory: (tokenService: ITokenPort, userRepository: IUserRepository) =>
-      new LoginUseCase(tokenService, userRepository),
-    inject: ['TokenService', 'UserRepository'],
+    useFactory: (tokenService: ITokenPort, findUserByEmailUseCase: FindUserByEmailUseCase) =>
+      new LoginUseCase(tokenService, findUserByEmailUseCase),
+    inject: ['TokenService', 'FindUserByEmailUseCase'],
   },
 ];

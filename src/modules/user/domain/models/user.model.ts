@@ -2,7 +2,7 @@ import { BaseModel, BaseModelParams } from '@/src/shared/domain/models/base.mode
 import { DomainError } from '@/src/utils/errors/domain.error';
 import { validateRegex } from '@/src/utils/regex/validatorHelper.regex';
 
-interface UserModelParams extends BaseModelParams {
+export interface UserModelParams extends BaseModelParams {
   fullName: string;
   email: string;
   password?: string;

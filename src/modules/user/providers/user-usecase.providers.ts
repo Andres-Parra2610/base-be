@@ -5,36 +5,37 @@ import { DeleteUserUseCase } from '../application/use-cases/delete-user.usecase'
 import { FindOneUserUseCase } from '../application/use-cases/find-one-user.usecase';
 import { FindAllUserUseCase } from '../application/use-cases/find-all-user.usecase';
 import { FindUserByEmailUseCase } from '../application/use-cases/find-by-email.usecase';
+import { IUserRepository } from '../domain/ports/user-repository.port';
 
 export const userUseCaseProviders: Provider[] = [
   {
     provide: CreateUserUseCase,
-    useFactory: (repo) => new CreateUserUseCase(repo),
+    useFactory: (repo: IUserRepository) => new CreateUserUseCase(repo),
     inject: ['UserRepository'],
   },
   {
     provide: UpdateUserUseCase,
-    useFactory: (repo) => new UpdateUserUseCase(repo),
+    useFactory: (repo: IUserRepository) => new UpdateUserUseCase(repo),
     inject: ['UserRepository'],
   },
   {
     provide: DeleteUserUseCase,
-    useFactory: (repo) => new DeleteUserUseCase(repo),
+    useFactory: (repo: IUserRepository) => new DeleteUserUseCase(repo),
     inject: ['UserRepository'],
   },
   {
     provide: FindOneUserUseCase,
-    useFactory: (repo) => new FindOneUserUseCase(repo),
+    useFactory: (repo: IUserRepository) => new FindOneUserUseCase(repo),
     inject: ['UserRepository'],
   },
   {
     provide: FindAllUserUseCase,
-    useFactory: (repo) => new FindAllUserUseCase(repo),
+    useFactory: (repo: IUserRepository) => new FindAllUserUseCase(repo),
     inject: ['UserRepository'],
   },
   {
     provide: FindUserByEmailUseCase,
-    useFactory: (repo) => new FindUserByEmailUseCase(repo),
+    useFactory: (repo: IUserRepository) => new FindUserByEmailUseCase(repo),
     inject: ['UserRepository'],
   },
 ];
