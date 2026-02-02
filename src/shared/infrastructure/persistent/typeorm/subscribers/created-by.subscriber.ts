@@ -26,13 +26,9 @@ export class CreatedBySubscriber implements EntitySubscriberInterface {
     const user = this.getUser();
     if (user && event && event.entity) {
       event.entity.updatedBy = user.id;
-    }
-  }
-
-  beforeSoftRemove(event: SoftRemoveEvent<BaseEntity>): Promise<any> | void {
-    const user = this.getUser();
-    if (user && event && event.entity) {
-      event.entity.deletedBy = user.id;
+      if (event.entity.deletedAt) {
+        event.entity.deletedBy = user.id;
+      }
     }
   }
 

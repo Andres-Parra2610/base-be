@@ -8,7 +8,6 @@ const isProduction = env.NODE_ENV === NODE_ENV.PRODUCTION;
 // Resolves to 'src' (development) or 'dist' (production)
 // path: /src/shared/infrastructure/persistent/typeorm/
 const baseDir = join(__dirname, '../../../../');
-console.log(baseDir);
 
 export const dataSource = new DataSource({
   type: 'postgres',

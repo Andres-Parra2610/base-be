@@ -73,7 +73,7 @@ export class UserRepository implements IUserRepository {
     if (hard) {
       await this.repository.delete(id);
     } else {
-      await this.repository.softDelete(id);
+      await this.repository.update(id, { deletedAt: new Date() });
     }
   }
 }
