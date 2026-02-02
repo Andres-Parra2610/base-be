@@ -10,7 +10,7 @@ import { UserMapper } from '../mappers/user.mapper';
 import { HandleDbErrors } from '@/src/core/decorators/errors/db-errors.decortator';
 import { TypeOrmQueryHelper } from '@/src/shared/infrastructure/persistent/typeorm/filter/typeorm-query-filter';
 import { QueryDto } from '@/src/utils/dto/pagination.dto';
-import { FindAllResponse } from '@/src/shared/infrastructure/types/pagination.type';
+import { PaginationResponse } from '@/src/shared/infrastructure/types/pagination.type';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -30,7 +30,7 @@ export class UserRepository implements IUserRepository {
   }
 
   @HandleDbErrors()
-  async findAll(queryDto: QueryDto): Promise<FindAllResponse<UserModel>> {
+  async findAll(queryDto: QueryDto): Promise<PaginationResponse<UserModel>> {
     const qb = this.repository.createQueryBuilder('user');
 
     const allowedFilters = ['fullName', 'email'];
