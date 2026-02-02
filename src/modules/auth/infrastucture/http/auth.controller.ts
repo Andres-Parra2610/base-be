@@ -6,6 +6,7 @@ import { FastifyReply } from 'fastify';
 import { env } from '@/src/config/env';
 
 import { RefreshTokenUseCase } from '../../application/use-cases/refresh-token.usecase';
+import { Public } from '@/src/core/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +15,7 @@ export class AuthController {
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
   ) {}
 
+  @Public()
   @Post('login')
   async login(
     @Body() dto: LoginAuthDto,
@@ -41,6 +43,7 @@ export class AuthController {
     return result;
   }
 
+  @Public()
   @Post('refresh')
   async refresh(
     @HeadersDec('x-device') device: string,

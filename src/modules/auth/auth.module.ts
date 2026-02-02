@@ -3,10 +3,10 @@ import { AuthController } from './infrastucture/http/auth.controller';
 import { authUseCaseProviders } from './providers/auth-usecase.providers';
 import { UserModule } from '../user/user.module';
 import { JwtTokenService } from './infrastucture/services/token.service';
-import { FindUserByEmailUseCase } from '../user/application/use-cases/find-by-email.usecase';
 import { JwtModule } from '@nestjs/jwt';
 import { env } from '@/src/config/env';
-
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from '@/src/core/guards/auth.guard';
 @Module({
   imports: [
     UserModule,
@@ -19,6 +19,10 @@ import { env } from '@/src/config/env';
     {
       provide: 'TokenService',
       useClass: JwtTokenService,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
     },
     ...authUseCaseProviders,
   ],
