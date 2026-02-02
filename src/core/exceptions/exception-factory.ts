@@ -8,7 +8,7 @@ const buildPropertyPath = (error: ValidationError, parentPath = ''): string => {
     : error.property;
 
   return path;
-}
+};
 
 const extractFirstConstraint = (errors: ValidationError[], parentPath = ''): string | null => {
   for (const error of errors) {
@@ -25,7 +25,7 @@ const extractFirstConstraint = (errors: ValidationError[], parentPath = ''): str
     }
   }
   return null;
-}
+};
 
 export const globalValidationExceptionFactory = (errors: ValidationError[]) => {
   const message = extractFirstConstraint(errors) || 'Error de validación';

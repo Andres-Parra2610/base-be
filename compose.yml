@@ -1,0 +1,22 @@
+services:
+  backend:
+    build: 
+      context: .
+      args:
+        - PORT=${PORT}
+    ports:
+      - ${PORT}:${PORT}
+    env_file:
+      - .env
+    container_name: base-backend
+    environment:
+      - PORT=${PORT}
+      - NODE_ENV=development
+      - DATABASE_HOST=base-db
+      - DATABASE_PORT=5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=base
+      - JWT_SECRET=secret
+      - JWT_REFRESH_TOKEN=refresh_token
+      - LOGGER_LEVEL=${LOGGER_LEVEL}

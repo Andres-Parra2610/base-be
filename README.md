@@ -1,98 +1,175 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Base Backend Project
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<div align="center">
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
+![Fastify](https://img.shields.io/badge/fastify-%23000000.svg?style=for-the-badge&logo=fastify&logoColor=white)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![TypeORM](https://img.shields.io/badge/TypeORM-FE0C2F.svg?style=for-the-badge&logo=TypeORM&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![SWC](https://img.shields.io/badge/SWC-FFFFFF?style=for-the-badge&logo=swc&logoColor=F5D00E)
+![pnpm](https://img.shields.io/badge/pnpm-%234a4a4a.svg?style=for-the-badge&logo=pnpm&logoColor=f69220)
 
-## Description
+</div>
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A production-ready, highly scalable backend starter template built with **NestJS**, **Fastify**, and **PostgreSQL**.
 
-## Project setup
+This project is architected with **Hexagonal Architecture (Ports and Adapters)** and **Vertical Slicing** to ensure maintainability, testability, and separation of concerns. It is designed to run **exclusively inside Docker containers**, ensuring a consistent environment from development to production.
 
-```bash
-$ pnpm install
+## 🚀 Tech Stack
+
+- **Runtime**: Node.js 22 (Alpine)
+- **Framework**: [NestJS 11](https://nestjs.com/)
+- **HTTP Adapter**: [Fastify](https://www.fastify.io/) (High performance)
+- **Language**: TypeScript
+- **Database**: PostgreSQL 17 + PostGIS
+- **ORM**: [TypeORM](https://typeorm.io/)
+- **Compiler**: [SWC](https://swc.rs/) (Speedy Web Compiler for fast builds)
+- **Containerization**: Docker & Docker Compose
+- **Package Manager**: `pnpm` (Strictly required)
+
+## 🏗 Architecture
+
+This project follows **Hexagonal Architecture** combined with **Vertical Slicing**.
+
+### Directory Structure
+
+```text
+src/
+├── modules/                # Vertical Slices (Feature Modules)
+│   └── [feature-name]/     # E.g., 'user', 'product'
+│       ├── application/    # Use Cases & Interfaces
+│       ├── domain/         # Models, Ports, Exceptions (Pure Business Logic)
+│       └── infrastucture/  # Adapters (HTTP Controllers, Repositories, Entities)
+├── shared/                 # Shared Kernel (Common Logic & Config)
+└── main.ts                 # Entry Point
 ```
 
-## Compile and run the project
+- **Domain**: The heart of the application. Contains business logic and is independent of frameworks or databases.
+- **Application**: Orchestrates the domain to perform specific user actions (Use Cases).
+- **Infrastructure**: Connects the application to the outside world (DB, HTTP, External APIs).
+
+## 🛠 Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed.
+- **No local Node.js or PostgreSQL required** (everything runs in containers).
+
+## ⚡️ Development Setup
+
+1.  **Duplicate environment file**:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+2.  **Start the environment**:
+    Use the local Docker Compose file to start the backend and database.
+
+    ```bash
+    docker compose -f compose.local.yml up --build
+    ```
+
+    - The API will be available at: `http://localhost:3000`
+    - Debugger is attached at: `0.0.0.0:9229`
+
+## 🗄 Database & Migrations
+
+Database changes are managed via **TypeORM Migrations**.
+
+### Generate a Migration
+
+To generate a migration based on your entity changes:
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm run migration:generate <MigrationName>
+# Example: pnpm run migration:generate CreateUserTable
 ```
 
-## Run tests
+### Run Migrations
+
+Apply pending migrations to the database:
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+pnpm run migration:run
 ```
 
-## Deployment
+### Revert Migrations
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Undo the last applied migration:
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm run migration:revert
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Create Empty Migration
 
-## Resources
+If you need to write raw SQL manually:
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+pnpm run migration:create <MigrationName>
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Seeding Data
 
-## Support
+Populate the database with initial data:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+pnpm run seed
+```
 
-## Stay in touch
+## 🧩 Feature Generation (Scaffolding)
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Don't waste time writing boilerplate. Use the included generator script to create new modules that strictly follow the Hexagonal Architecture.
 
-## License
+```bash
+pnpm run generate:module <module-name>
+# Example: pnpm run generate:module product-category
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This will create:
+
+- `src/modules/product-category/`
+- Full directory structure (Domain, Application, Infrastructure)
+- CRUD Use Cases & Interfaces
+- Controllers & DTOs
+- Repository & Entities
+- Module definition
+
+## 🧪 Testing
+
+```bash
+# Unit Tests
+pnpm run test
+
+# Watch Mode
+pnpm run test:watch
+
+# Coverage
+pnpm run test:cov
+
+# E2E Tests
+pnpm run test:e2e
+```
+
+## 📝 Code Style
+
+- **Linting**: ESLint
+- **Formatting**: Prettier
+- **Commit/Build**: Uses SWC for lightning-fast compilation.
+
+To format code manually:
+
+```bash
+pnpm run format
+```
+
+## 🐳 Docker Commands Cheatsheet
+
+| Action           | Command                                          |
+| :--------------- | :----------------------------------------------- |
+| **Start Dev**    | `docker compose -f compose.local.yml up`         |
+| **Rebuild**      | `docker compose -f compose.local.yml up --build` |
+| **Stop**         | `docker compose -f compose.local.yml down`       |
+| **Shell Access** | `docker exec -it base-backend sh`                |
+| **View Logs**    | `docker logs -f base-backend`                    |

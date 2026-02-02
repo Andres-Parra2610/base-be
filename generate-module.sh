@@ -1,345 +1,362 @@
 #!/bin/bash
 
-# Check if module name is provided
+# Exit on error
+set -e
+
 if [ -z "$1" ]; then
   echo "Usage: $0 <module-name>"
+  echo "Example: $0 product-category"
   exit 1
 fi
 
 MODULE_NAME=$1
-# Convert to PascalCase (e.g., "animals" -> "Animals", "user-profiles" -> "UserProfiles")
-MODULE_PASCAL=$(echo "$MODULE_NAME" | awk -F- '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1' OFS='')
-# Convert to camelCase (e.g., "animals" -> "animals", "user-profiles" -> "userProfiles")
-MODULE_CAMEL=$(echo "$MODULE_NAME" | awk -F- '{for(i=1;i<=NF;i++) if(i==1) $i=tolower($i); else $i=toupper(substr($i,1,1)) substr($i,2)} 1' OFS='')
 
-# Paths
-MODULE_PATH="src/modules/$MODULE_NAME"
-REPO_PATH="src/repositories/$MODULE_NAME"
+# Convert MODULE_NAME (kebab-case) to PascalCase and camelCase
+# MacOS compatible sed/awk usage
+PASCAL_CASE=$(echo "$MODULE_NAME" | awk -F'-' '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)}1' OFS='')
+CAMEL_CASE=$(echo "$MODULE_NAME" | awk -F'-' '{printf $1; for(i=2;i<=NF;i++) printf toupper(substr($i,1,1)) substr($i,2); print ""}')
 
-echo "Creating module: $MODULE_NAME"
-echo "PascalCase: $MODULE_PASCAL"
-echo "camelCase: $MODULE_CAMEL"
+BASE_DIR="src/modules/$MODULE_NAME"
 
-# Create directories
-mkdir -p "$MODULE_PATH/dto"
-mkdir -p "$MODULE_PATH/entities"
-mkdir -p "$MODULE_PATH/use-cases/command"
-mkdir -p "$MODULE_PATH/use-cases/query"
-mkdir -p "$MODULE_PATH/validators"
-mkdir -p "$REPO_PATH"
+echo "Generating module: $MODULE_NAME"
+echo "PascalCase: $PASCAL_CASE"
+echo "camelCase: $CAMEL_CASE"
 
-# --- DTOs ---
-# Create DTO
-cat > "$MODULE_PATH/dto/create-$MODULE_NAME.dto.ts" <<EOF
-import { IsNotEmpty } from 'class-validator';
+# Create Directory Structure (Note: intentional typos 'infrastucture' and 'respositories' to match project)
+mkdir -p "$BASE_DIR/application/interfaces"
+mkdir -p "$BASE_DIR/application/use-cases"
+mkdir -p "$BASE_DIR/domain/exceptions"
+mkdir -p "$BASE_DIR/domain/models"
+mkdir -p "$BASE_DIR/domain/ports"
+mkdir -p "$BASE_DIR/infrastucture/http/dto"
+mkdir -p "$BASE_DIR/infrastucture/persistence/entities"
+mkdir -p "$BASE_DIR/infrastucture/persistence/mappers"
+mkdir -p "$BASE_DIR/infrastucture/persistence/respositories"
+mkdir -p "$BASE_DIR/providers"
 
-export class Create${MODULE_PASCAL}Dto {
+# ==========================================
+# DOMAIN LAYER
+# ==========================================
 
+# 1. Model
+cat > "$BASE_DIR/domain/models/$MODULE_NAME.model.ts" <<EOL
+import { BaseModel, BaseModelParams } from '@/shared/domain/models/base.model';
+
+export interface ${PASCAL_CASE}ModelParams extends BaseModelParams {
+  // Add properties here
+  name: string;
 }
-EOF
 
-# Update DTO
-cat > "$MODULE_PATH/dto/update-$MODULE_NAME.dto.ts" <<EOF
-import { PartialType } from '@nestjs/mapped-types';
-import { Create${MODULE_PASCAL}Dto } from './create-$MODULE_NAME.dto';
+export class ${PASCAL_CASE}Model extends BaseModel<${PASCAL_CASE}ModelParams> {
+  name: string;
 
-export class Update${MODULE_PASCAL}Dto extends PartialType(Create${MODULE_PASCAL}Dto) {}
-EOF
-
-# Get DTO
-cat > "$MODULE_PATH/dto/get-$MODULE_NAME.dto.ts" <<EOF
-import { IsOptional } from 'class-validator';
-import { PaginationDto } from 'src/shared/dto/pagination.dto';
-
-
-export class Get${MODULE_PASCAL}Dto extends PaginationDto {}
-EOF
-
-# --- Entity ---
-cat > "$MODULE_PATH/entities/$MODULE_NAME.entity.ts" <<EOF
-import { Base } from 'src/shared/entities/base-entity';
-import { Entity, Column } from 'typeorm';
-
-@Entity({ name: '${MODULE_NAME//-/_}' })
-export class ${MODULE_PASCAL} extends Base {
- 
-}
-EOF
-
-# --- Repository ---
-cat > "$REPO_PATH/$MODULE_NAME.repository.ts" <<EOF
-import { Injectable } from "@nestjs/common";
-import { ${MODULE_PASCAL} } from "src/modules/$MODULE_NAME/entities/$MODULE_NAME.entity";
-import { DataSource, Repository } from "typeorm";
-
-@Injectable()
-export class ${MODULE_PASCAL}Repository extends Repository<${MODULE_PASCAL}> {
-  constructor(private dataSource: DataSource) {
-    super(${MODULE_PASCAL}, dataSource.manager);
+  constructor(params: ${PASCAL_CASE}ModelParams) {
+    super(params);
+    this.name = params.name;
   }
 }
-EOF
+EOL
 
-# --- Provider ---
-cat > "$REPO_PATH/$MODULE_NAME.provider.ts" <<EOF
-import { DataSource } from 'typeorm';
-import { ${MODULE_PASCAL}Repository } from './$MODULE_NAME.repository';
+# 2. Port (Repository Interface)
+cat > "$BASE_DIR/domain/ports/$MODULE_NAME-repository.port.ts" <<EOL
+import { IBaseRepository } from '@/shared/domain/ports/base-repository.port';
+import { ${PASCAL_CASE}Model } from '../models/$MODULE_NAME.model';
 
-export const ${MODULE_CAMEL}Providers = [
-  {
-    provide: ${MODULE_PASCAL}Repository,
-    useFactory: (dataSource: DataSource) => new ${MODULE_PASCAL}Repository(dataSource),
-    inject: ['DATA_SOURCE'],
-  },
-];
-EOF
+export interface I${PASCAL_CASE}Repository extends IBaseRepository<${PASCAL_CASE}Model> {}
+EOL
 
-# --- Use Cases ---
+# ==========================================
+# APPLICATION LAYER
+# ==========================================
 
-# Command: Create
-cat > "$MODULE_PATH/use-cases/command/create-$MODULE_NAME.usecase.ts" <<EOF
-import { Injectable } from "@nestjs/common";
-import { Create${MODULE_PASCAL}Dto } from "../../dto/create-$MODULE_NAME.dto";
-import { ${MODULE_PASCAL} } from "../../entities/$MODULE_NAME.entity";
-import { ${MODULE_PASCAL}Repository } from "src/repositories/$MODULE_NAME/$MODULE_NAME.repository";
-
-@Injectable()
-export class Create${MODULE_PASCAL}UseCase {
-  constructor(private readonly repository: ${MODULE_PASCAL}Repository) { }
-
-  async execute(create${MODULE_PASCAL}Dto: Create${MODULE_PASCAL}Dto): Promise<${MODULE_PASCAL}> {
-    return this.repository.save(create${MODULE_PASCAL}Dto);
-  }
+# 3. Interfaces
+cat > "$BASE_DIR/application/interfaces/create-$MODULE_NAME.interface.ts" <<EOL
+export interface ICreate${PASCAL_CASE} {
+  name: string;
 }
-EOF
+EOL
 
-# Command: Update
-cat > "$MODULE_PATH/use-cases/command/update-$MODULE_NAME.usecase.ts" <<EOF
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { Update${MODULE_PASCAL}Dto } from "../../dto/update-$MODULE_NAME.dto";
-import { ${MODULE_PASCAL} } from "../../entities/$MODULE_NAME.entity";
-import { ${MODULE_PASCAL}Repository } from "src/repositories/$MODULE_NAME/$MODULE_NAME.repository";
+cat > "$BASE_DIR/application/interfaces/update-$MODULE_NAME.interface.ts" <<EOL
+import { ICreate${PASCAL_CASE} } from './create-$MODULE_NAME.interface';
 
-@Injectable()
-export class Update${MODULE_PASCAL}UseCase {
-  constructor(private readonly repository: ${MODULE_PASCAL}Repository) { }
+export interface IUpdate${PASCAL_CASE} extends Partial<ICreate${PASCAL_CASE}> {}
+EOL
 
-  async execute(id: string, update${MODULE_PASCAL}Dto: Update${MODULE_PASCAL}Dto): Promise<${MODULE_PASCAL}> {
-    const entity = await this.repository.findOne({ where: { id } });
-    if (!entity) throw new BadRequestException('El registro no existe');
-    this.repository.merge(entity, update${MODULE_PASCAL}Dto);
-    return this.repository.save(entity);
-  }
-}
-EOF
+# 4. Use Cases
+# Create
+cat > "$BASE_DIR/application/use-cases/create-$MODULE_NAME.usecase.ts" <<EOL
+import { I${PASCAL_CASE}Repository } from '../../domain/ports/$MODULE_NAME-repository.port';
+import { ICreate${PASCAL_CASE} } from '../interfaces/create-$MODULE_NAME.interface';
+import { ${PASCAL_CASE}Model } from '../../domain/models/$MODULE_NAME.model';
+import { generateUuidV4 } from '@/src/utils/uuid-generator';
 
-# Command: Remove
-cat > "$MODULE_PATH/use-cases/command/remove-$MODULE_NAME.usecase.ts" <<EOF
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { ${MODULE_PASCAL} } from "../../entities/$MODULE_NAME.entity";
-import { ${MODULE_PASCAL}Repository } from "src/repositories/$MODULE_NAME/$MODULE_NAME.repository";
+export class Create${PASCAL_CASE}UseCase {
+  constructor(private readonly repository: I${PASCAL_CASE}Repository) {}
 
-@Injectable()
-export class Remove${MODULE_PASCAL}UseCase {
-  constructor(private readonly repository: ${MODULE_PASCAL}Repository) { }
-
-  async execute(id: string): Promise<{ message: string, data: ${MODULE_PASCAL} }> {
-    const entity = await this.repository.findOne({ where: { id } });
-    if (!entity) throw new BadRequestException('El registro no existe');
-    await this.repository.softDelete(id);
-    return {
-      message: 'Eliminado correctamente',
-      data: entity
-    }
-  }
-}
-EOF
-
-# Query: Find All
-cat > "$MODULE_PATH/use-cases/query/find-all-$MODULE_NAME.usecase.ts" <<EOF
-import { Injectable } from "@nestjs/common";
-import { Get${MODULE_PASCAL}Dto } from "../../dto/get-$MODULE_NAME.dto";
-import * as Pagination from 'src/utils/pagination';
-import { ${MODULE_PASCAL}Repository } from "src/repositories/$MODULE_NAME/$MODULE_NAME.repository";
-
-@Injectable()
-export class FindAll${MODULE_PASCAL}UseCase {
-  constructor(private readonly repository: ${MODULE_PASCAL}Repository) { }
-
-  async execute(q: Get${MODULE_PASCAL}Dto) {
-    const { page, limit } = q;
-    const pagination = Pagination.query({ page, limit });
-    const [rows, total] = await this.repository.findAndCount({
-      ...pagination
+  async execute(dto: ICreate${PASCAL_CASE}): Promise<${PASCAL_CASE}Model> {
+    const entity = new ${PASCAL_CASE}Model({
+      id: generateUuidV4(),
+      name: dto.name,
     });
-
-    return Pagination.get(rows, page, limit, total);
+    return this.repository.create(entity);
   }
 }
-EOF
+EOL
 
-# Query: Find One
-cat > "$MODULE_PATH/use-cases/query/find-one-$MODULE_NAME.usecase.ts" <<EOF
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { ${MODULE_PASCAL}Repository } from "src/repositories/$MODULE_NAME/$MODULE_NAME.repository";
-import { ${MODULE_PASCAL} } from "../../entities/$MODULE_NAME.entity";
+# Find All
+cat > "$BASE_DIR/application/use-cases/find-all-$MODULE_NAME.usecase.ts" <<EOL
+import { I${PASCAL_CASE}Repository } from '../../domain/ports/$MODULE_NAME-repository.port';
+import { QueryDto } from '@/src/utils/dto/pagination.dto';
+import { PaginationResult } from '@/src/utils/interfaces/pagination.interface';
+import { ${PASCAL_CASE}Model } from '../../domain/models/$MODULE_NAME.model';
 
-@Injectable()
-export class FindOne${MODULE_PASCAL}UseCase {
-  constructor(private readonly repository: ${MODULE_PASCAL}Repository) { }
+export class FindAll${PASCAL_CASE}UseCase {
+  constructor(private readonly repository: I${PASCAL_CASE}Repository) {}
 
-  async execute(id: string): Promise<${MODULE_PASCAL}> {
-    const entity = await this.repository.findOne({ where: { id } });
-    if (!entity) {
-      throw new NotFoundException(\`Registro con ID \${id} no encontrado\`);
-    }
+  async execute(query: QueryDto): Promise<PaginationResult<${PASCAL_CASE}Model>> {
+    return this.repository.findAll(query);
+  }
+}
+EOL
+
+# Find One
+cat > "$BASE_DIR/application/use-cases/find-one-$MODULE_NAME.usecase.ts" <<EOL
+import { I${PASCAL_CASE}Repository } from '../../domain/ports/$MODULE_NAME-repository.port';
+import { ${PASCAL_CASE}Model } from '../../domain/models/$MODULE_NAME.model';
+
+export class FindOne${PASCAL_CASE}UseCase {
+  constructor(private readonly repository: I${PASCAL_CASE}Repository) {}
+
+  async execute(id: string): Promise<${PASCAL_CASE}Model | null> {
+    return this.repository.findOne(id);
+  }
+}
+EOL
+
+# Update
+cat > "$BASE_DIR/application/use-cases/update-$MODULE_NAME.usecase.ts" <<EOL
+import { I${PASCAL_CASE}Repository } from '../../domain/ports/$MODULE_NAME-repository.port';
+import { IUpdate${PASCAL_CASE} } from '../interfaces/update-$MODULE_NAME.interface';
+import { ${PASCAL_CASE}Model } from '../../domain/models/$MODULE_NAME.model';
+
+export class Update${PASCAL_CASE}UseCase {
+  constructor(private readonly repository: I${PASCAL_CASE}Repository) {}
+
+  async execute(input: IUpdate${PASCAL_CASE} & { id: string }): Promise<${PASCAL_CASE}Model | null> {
+    const { id, ...params } = input;
+    return this.repository.update(id, params);
+  }
+}
+EOL
+
+# Delete
+cat > "$BASE_DIR/application/use-cases/delete-$MODULE_NAME.usecase.ts" <<EOL
+import { I${PASCAL_CASE}Repository } from '../../domain/ports/$MODULE_NAME-repository.port';
+
+export class Delete${PASCAL_CASE}UseCase {
+  constructor(private readonly repository: I${PASCAL_CASE}Repository) {}
+
+  async execute(id: string): Promise<void> {
+    return this.repository.delete(id);
+  }
+}
+EOL
+
+# ==========================================
+# INFRASTRUCTURE LAYER
+# ==========================================
+
+# 5. DTOs
+cat > "$BASE_DIR/infrastucture/http/dto/create-$MODULE_NAME.dto.ts" <<EOL
+import { IsString, IsNotEmpty } from 'class-validator';
+import { ICreate${PASCAL_CASE} } from '../../../application/interfaces/create-$MODULE_NAME.interface';
+
+export class Create${PASCAL_CASE}Dto implements ICreate${PASCAL_CASE} {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+}
+EOL
+
+cat > "$BASE_DIR/infrastucture/http/dto/update-$MODULE_NAME.dto.ts" <<EOL
+import { PartialType } from '@nestjs/mapped-types';
+import { Create${PASCAL_CASE}Dto } from './create-$MODULE_NAME.dto';
+import { IUpdate${PASCAL_CASE} } from '../../../application/interfaces/update-$MODULE_NAME.interface';
+
+export class Update${PASCAL_CASE}Dto extends PartialType(Create${PASCAL_CASE}Dto) implements IUpdate${PASCAL_CASE} {}
+EOL
+
+# 6. TypeORM Entity
+cat > "$BASE_DIR/infrastucture/persistence/entities/$MODULE_NAME.entity.ts" <<EOL
+import { Entity, Column } from 'typeorm';
+import { BaseEntity } from '@/shared/infrastructure/persistent/typeorm/base.entity';
+
+@Entity('${CAMEL_CASE}s')
+export class ${PASCAL_CASE}Entity extends BaseEntity {
+  @Column()
+  name: string;
+}
+EOL
+
+# 7. Mapper
+cat > "$BASE_DIR/infrastucture/persistence/mappers/$MODULE_NAME.mapper.ts" <<EOL
+import { ${PASCAL_CASE}Model } from '../../../domain/models/$MODULE_NAME.model';
+import { ${PASCAL_CASE}Entity } from '../entities/$MODULE_NAME.entity';
+
+export class ${PASCAL_CASE}Mapper {
+  static toDomain(entity: ${PASCAL_CASE}Entity): ${PASCAL_CASE}Model {
+    return new ${PASCAL_CASE}Model(entity);
+  }
+
+  static toPersistence(domain: ${PASCAL_CASE}Model): ${PASCAL_CASE}Entity {
+    const entity = new ${PASCAL_CASE}Entity();
+    Object.assign(entity, domain);
     return entity;
   }
 }
-EOF
+EOL
 
-# --- Service ---
-cat > "$MODULE_PATH/$MODULE_NAME.service.ts" <<EOF
+# 8. Repository Implementation
+cat > "$BASE_DIR/infrastucture/persistence/respositories/$MODULE_NAME.repository.ts" <<EOL
 import { Injectable } from '@nestjs/common';
-import { Create${MODULE_PASCAL}Dto } from './dto/create-$MODULE_NAME.dto';
-import { Update${MODULE_PASCAL}Dto } from './dto/update-$MODULE_NAME.dto';
-import { Get${MODULE_PASCAL}Dto } from './dto/get-$MODULE_NAME.dto';
-import { Create${MODULE_PASCAL}UseCase } from './use-cases/command/create-$MODULE_NAME.usecase';
-import { Update${MODULE_PASCAL}UseCase } from './use-cases/command/update-$MODULE_NAME.usecase';
-import { Remove${MODULE_PASCAL}UseCase } from './use-cases/command/remove-$MODULE_NAME.usecase';
-import { FindAll${MODULE_PASCAL}UseCase } from './use-cases/query/find-all-$MODULE_NAME.usecase';
-import { FindOne${MODULE_PASCAL}UseCase } from './use-cases/query/find-one-$MODULE_NAME.usecase';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { BaseRepository } from '@/shared/infrastructure/persistent/typeorm/base.repository';
+import { I${PASCAL_CASE}Repository } from '../../../domain/ports/$MODULE_NAME-repository.port';
+import { ${PASCAL_CASE}Model } from '../../../domain/models/$MODULE_NAME.model';
+import { ${PASCAL_CASE}Entity } from '../entities/$MODULE_NAME.entity';
+import { ${PASCAL_CASE}Mapper } from '../mappers/$MODULE_NAME.mapper';
 
 @Injectable()
-export class ${MODULE_PASCAL}Service {
+export class ${PASCAL_CASE}Repository
+  extends BaseRepository<${PASCAL_CASE}Model, ${PASCAL_CASE}Entity>
+  implements I${PASCAL_CASE}Repository
+{
   constructor(
-    private readonly createUseCase: Create${MODULE_PASCAL}UseCase,
-    private readonly updateUseCase: Update${MODULE_PASCAL}UseCase,
-    private readonly removeUseCase: Remove${MODULE_PASCAL}UseCase,
-    private readonly findAllUseCase: FindAll${MODULE_PASCAL}UseCase,
-    private readonly findOneUseCase: FindOne${MODULE_PASCAL}UseCase,
-  ) {}
-
-  create(create${MODULE_PASCAL}Dto: Create${MODULE_PASCAL}Dto) {
-    return this.createUseCase.execute(create${MODULE_PASCAL}Dto);
-  }
-
-  findAll(query: Get${MODULE_PASCAL}Dto) {
-    return this.findAllUseCase.execute(query);
-  }
-
-  findOne(id: string) {
-    return this.findOneUseCase.execute(id);
-  }
-
-  update(id: string, update${MODULE_PASCAL}Dto: Update${MODULE_PASCAL}Dto) {
-    return this.updateUseCase.execute(id, update${MODULE_PASCAL}Dto);
-  }
-
-  remove(id: string) {
-    return this.removeUseCase.execute(id);
+    @InjectRepository(${PASCAL_CASE}Entity)
+    private readonly repository: Repository<${PASCAL_CASE}Entity>,
+  ) {
+    super(repository, ${PASCAL_CASE}Mapper.toDomain, ${PASCAL_CASE}Mapper.toPersistence);
   }
 }
-EOF
+EOL
 
-# --- Controller ---
-cat > "$MODULE_PATH/$MODULE_NAME.controller.ts" <<EOF
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseUUIDPipe } from '@nestjs/common';
-import { ${MODULE_PASCAL}Service } from './$MODULE_NAME.service';
-import { Create${MODULE_PASCAL}Dto } from './dto/create-$MODULE_NAME.dto';
-import { Update${MODULE_PASCAL}Dto } from './dto/update-$MODULE_NAME.dto';
-import { Get${MODULE_PASCAL}Dto } from './dto/get-$MODULE_NAME.dto';
+# 9. Controller
+cat > "$BASE_DIR/infrastucture/http/$MODULE_NAME.controller.ts" <<EOL
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
+import { Create${PASCAL_CASE}UseCase } from '../../application/use-cases/create-$MODULE_NAME.usecase';
+import { FindAll${PASCAL_CASE}UseCase } from '../../application/use-cases/find-all-$MODULE_NAME.usecase';
+import { FindOne${PASCAL_CASE}UseCase } from '../../application/use-cases/find-one-$MODULE_NAME.usecase';
+import { Update${PASCAL_CASE}UseCase } from '../../application/use-cases/update-$MODULE_NAME.usecase';
+import { Delete${PASCAL_CASE}UseCase } from '../../application/use-cases/delete-$MODULE_NAME.usecase';
+import { Create${PASCAL_CASE}Dto } from './dto/create-$MODULE_NAME.dto';
+import { Update${PASCAL_CASE}Dto } from './dto/update-$MODULE_NAME.dto';
+import { QueryDto } from '@/src/utils/dto/pagination.dto';
 
 @Controller('$MODULE_NAME')
-export class ${MODULE_PASCAL}Controller {
-  constructor(private readonly ${MODULE_CAMEL}Service: ${MODULE_PASCAL}Service) {}
+export class ${PASCAL_CASE}Controller {
+  constructor(
+    private readonly createUseCase: Create${PASCAL_CASE}UseCase,
+    private readonly findAllUseCase: FindAll${PASCAL_CASE}UseCase,
+    private readonly findOneUseCase: FindOne${PASCAL_CASE}UseCase,
+    private readonly updateUseCase: Update${PASCAL_CASE}UseCase,
+    private readonly deleteUseCase: Delete${PASCAL_CASE}UseCase,
+  ) {}
 
   @Post()
-  create(@Body() create${MODULE_PASCAL}Dto: Create${MODULE_PASCAL}Dto) {
-    return this.${MODULE_CAMEL}Service.create(create${MODULE_PASCAL}Dto);
+  async create(@Body() dto: Create${PASCAL_CASE}Dto) {
+    return await this.createUseCase.execute(dto);
   }
 
   @Get()
-  findAll(@Query() query: Get${MODULE_PASCAL}Dto) {
-    return this.${MODULE_CAMEL}Service.findAll(query);
+  async findAll(@Query() query: QueryDto) {
+    return await this.findAllUseCase.execute(query);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.${MODULE_CAMEL}Service.findOne(id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.findOneUseCase.execute(id);
   }
 
-  @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() update${MODULE_PASCAL}Dto: Update${MODULE_PASCAL}Dto) {
-    return this.${MODULE_CAMEL}Service.update(id, update${MODULE_PASCAL}Dto);
+  @Put(':id')
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: Update${PASCAL_CASE}Dto) {
+    return await this.updateUseCase.execute({ ...dto, id });
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.${MODULE_CAMEL}Service.remove(id);
+  async delete(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.deleteUseCase.execute(id);
   }
 }
-EOF
+EOL
 
-# --- Module ---
-cat > "$MODULE_PATH/$MODULE_NAME.module.ts" <<EOF
+# ==========================================
+# WIRING
+# ==========================================
+
+# 10. Providers
+cat > "$BASE_DIR/providers/$MODULE_NAME-usecase.providers.ts" <<EOL
+import { Provider } from '@nestjs/common';
+import { Create${PASCAL_CASE}UseCase } from '../application/use-cases/create-$MODULE_NAME.usecase';
+import { FindAll${PASCAL_CASE}UseCase } from '../application/use-cases/find-all-$MODULE_NAME.usecase';
+import { FindOne${PASCAL_CASE}UseCase } from '../application/use-cases/find-one-$MODULE_NAME.usecase';
+import { Update${PASCAL_CASE}UseCase } from '../application/use-cases/update-$MODULE_NAME.usecase';
+import { Delete${PASCAL_CASE}UseCase } from '../application/use-cases/delete-$MODULE_NAME.usecase';
+
+export const ${CAMEL_CASE}UseCaseProviders: Provider[] = [
+  {
+    provide: Create${PASCAL_CASE}UseCase,
+    useFactory: (repo) => new Create${PASCAL_CASE}UseCase(repo),
+    inject: ['${PASCAL_CASE}Repository'],
+  },
+  {
+    provide: FindAll${PASCAL_CASE}UseCase,
+    useFactory: (repo) => new FindAll${PASCAL_CASE}UseCase(repo),
+    inject: ['${PASCAL_CASE}Repository'],
+  },
+  {
+    provide: FindOne${PASCAL_CASE}UseCase,
+    useFactory: (repo) => new FindOne${PASCAL_CASE}UseCase(repo),
+    inject: ['${PASCAL_CASE}Repository'],
+  },
+  {
+    provide: Update${PASCAL_CASE}UseCase,
+    useFactory: (repo) => new Update${PASCAL_CASE}UseCase(repo),
+    inject: ['${PASCAL_CASE}Repository'],
+  },
+  {
+    provide: Delete${PASCAL_CASE}UseCase,
+    useFactory: (repo) => new Delete${PASCAL_CASE}UseCase(repo),
+    inject: ['${PASCAL_CASE}Repository'],
+  },
+];
+EOL
+
+# 11. Module Definition
+cat > "$BASE_DIR/$MODULE_NAME.module.ts" <<EOL
 import { Module } from '@nestjs/common';
-import { ${MODULE_PASCAL}Service } from './$MODULE_NAME.service';
-import { ${MODULE_PASCAL}Controller } from './$MODULE_NAME.controller';
-import { DatabaseModule } from '../../database/database.module';
-import { Create${MODULE_PASCAL}UseCase } from './use-cases/command/create-$MODULE_NAME.usecase';
-import { Update${MODULE_PASCAL}UseCase } from './use-cases/command/update-$MODULE_NAME.usecase';
-import { Remove${MODULE_PASCAL}UseCase } from './use-cases/command/remove-$MODULE_NAME.usecase';
-import { FindAll${MODULE_PASCAL}UseCase } from './use-cases/query/find-all-$MODULE_NAME.usecase';
-import { FindOne${MODULE_PASCAL}UseCase } from './use-cases/query/find-one-$MODULE_NAME.usecase';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { FeatureDatabaseModule } from '@/src/shared/infrastructure/persistent/typeorm/feature-database.module';
+import { ${PASCAL_CASE}Entity } from './infrastucture/persistence/entities/$MODULE_NAME.entity';
+import { ${PASCAL_CASE}Repository } from './infrastucture/persistence/respositories/$MODULE_NAME.repository';
+import { ${PASCAL_CASE}Controller } from './infrastucture/http/$MODULE_NAME.controller';
+import { ${CAMEL_CASE}UseCaseProviders } from './providers/$MODULE_NAME-usecase.providers';
 
 @Module({
-  imports: [DatabaseModule],
-  controllers: [${MODULE_PASCAL}Controller],
-  providers: [
-    ${MODULE_PASCAL}Service,
-    Create${MODULE_PASCAL}UseCase,
-    Update${MODULE_PASCAL}UseCase,
-    Remove${MODULE_PASCAL}UseCase,
-    FindAll${MODULE_PASCAL}UseCase,
-    FindOne${MODULE_PASCAL}UseCase,
+  imports: [
+    FeatureDatabaseModule.forFeature([${PASCAL_CASE}Entity]),
   ],
+  providers: [
+    {
+      provide: '${PASCAL_CASE}Repository',
+      useClass: ${PASCAL_CASE}Repository,
+    },
+    ...${CAMEL_CASE}UseCaseProviders,
+  ],
+  controllers: [${PASCAL_CASE}Controller],
+  exports: [...${CAMEL_CASE}UseCaseProviders],
 })
-export class ${MODULE_PASCAL}Module {}
-EOF
+export class ${PASCAL_CASE}Module {}
+EOL
 
-# --- Register Module in src/modules.ts ---
-MODULES_FILE="src/modules.ts"
-if [ -f "$MODULES_FILE" ]; then
-    # Add import
-    sed -i '' "1i\\
-import { ${MODULE_PASCAL}Module } from \"./modules/$MODULE_NAME/$MODULE_NAME.module\";
-" "$MODULES_FILE"
-    
-    # Add to array
-    sed -i '' "/export const APP_MODULES = \[/a\\
-  ${MODULE_PASCAL}Module,
-" "$MODULES_FILE"
-    echo "Updated $MODULES_FILE"
-else
-    echo "Warning: $MODULES_FILE not found. Skipping module registration."
-fi
-
-# --- Register Provider in src/repositories/providers.ts ---
-PROVIDERS_FILE="src/repositories/providers.ts"
-if [ -f "$PROVIDERS_FILE" ]; then
-    # Add import
-    sed -i '' "1i\\
-import { ${MODULE_CAMEL}Providers } from \"./$MODULE_NAME/$MODULE_NAME.provider\";
-" "$PROVIDERS_FILE"
-    
-    # Add to array
-    sed -i '' "/export const repositoriesProviders = \[/a\\
-  ...${MODULE_CAMEL}Providers,
-" "$PROVIDERS_FILE"
-    echo "Updated $PROVIDERS_FILE"
-else
-    echo "Warning: $PROVIDERS_FILE not found. Skipping provider registration."
-fi
-
-echo "Done! Module $MODULE_NAME created successfully."
+echo "Module $MODULE_NAME generated successfully at $BASE_DIR"

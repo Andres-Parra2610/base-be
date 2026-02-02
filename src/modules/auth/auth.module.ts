@@ -1,20 +1,32 @@
 import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { AuthController } from './infrastucture/http/auth.controller';
+import { authUseCaseProviders } from './providers/auth-usecase.providers';
+import { UserModule } from '../user/user.module';
+import { JwtTokenService } from './infrastucture/services/token.service';
 import { JwtModule } from '@nestjs/jwt';
-import { env } from 'src/config/env';
-import { TokenUseCase } from './use-cases/command/token.usecase';
-import { LoginUseCase } from './use-cases/command/login.usecase';
-
+import { env } from '@/src/config/env';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from '@/src/core/guards/auth.guard';
 @Module({
-  controllers: [AuthController],
-  providers: [AuthService, TokenUseCase, LoginUseCase],
   imports: [
+    UserModule,
     JwtModule.register({
-      global: true,
       secret: env.JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
+      signOptions: { expiresIn: '7d' },
     }),
-  ]
+  ],
+  providers: [
+    {
+      provide: 'TokenService',
+      useClass: JwtTokenService,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+    ...authUseCaseProviders,
+  ],
+  controllers: [AuthController],
+  exports: [...authUseCaseProviders],
 })
-export class AuthModule { }
+export class AuthModule {}
