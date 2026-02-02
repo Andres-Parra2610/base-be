@@ -1,13 +1,20 @@
-import { EntitySubscriberInterface, EventSubscriber, InsertEvent, UpdateEvent } from 'typeorm';
+import {
+  EntitySubscriberInterface,
+  EventSubscriber,
+  InsertEvent,
+  SoftRemoveEvent,
+  UpdateEvent,
+} from 'typeorm';
 import { ClsServiceManager } from 'nestjs-cls';
+import { BaseEntity } from '../entity/base-entity';
 
 @EventSubscriber()
 export class CreatedBySubscriber implements EntitySubscriberInterface {
-  /* listenTo() {
-    return Base;
+  listenTo() {
+    return BaseEntity;
   }
 
-  beforeInsert(event: InsertEvent<Base>) {
+  beforeInsert(event: InsertEvent<BaseEntity>) {
     const user = this.getUser();
     if (user && event && event.entity) {
       event.entity.createdBy = user.id;
@@ -15,10 +22,17 @@ export class CreatedBySubscriber implements EntitySubscriberInterface {
     }
   }
 
-  beforeUpdate(event: UpdateEvent<Base>) {
+  beforeUpdate(event: UpdateEvent<BaseEntity>) {
     const user = this.getUser();
     if (user && event && event.entity) {
       event.entity.updatedBy = user.id;
+    }
+  }
+
+  beforeSoftRemove(event: SoftRemoveEvent<BaseEntity>): Promise<any> | void {
+    const user = this.getUser();
+    if (user && event && event.entity) {
+      event.entity.deletedBy = user.id;
     }
   }
 
@@ -26,5 +40,5 @@ export class CreatedBySubscriber implements EntitySubscriberInterface {
     const cls = ClsServiceManager.getClsService();
     const user = cls?.get('user');
     return user;
-  } */
+  }
 }

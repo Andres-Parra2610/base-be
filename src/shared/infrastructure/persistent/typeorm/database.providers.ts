@@ -1,8 +1,9 @@
 import { env } from 'src/config/env';
 import { DataSource } from 'typeorm';
 import { join } from 'path';
+import { NODE_ENV } from '@/src/shared/types/node_env.type';
 
-const isProduction = env.NODE_ENV === 'production';
+const isProduction = env.NODE_ENV === NODE_ENV.PRODUCTION;
 
 // Resolves to 'src' (development) or 'dist' (production)
 // path: /src/shared/infrastructure/persistent/typeorm/
