@@ -24,7 +24,7 @@ export class UserRepository implements IUserRepository {
 
   @HandleDbErrors()
   async create(user: UserModel): Promise<UserModel> {
-    const persistenceModel = UserMapper.toEntity(user);
+    const persistenceModel = UserMapper.toPersistence(user);
     const savedEntity = await this.repository.save(persistenceModel);
     return UserMapper.toDomain(savedEntity);
   }
@@ -63,7 +63,7 @@ export class UserRepository implements IUserRepository {
 
   @HandleDbErrors()
   async update(user: UserModel): Promise<UserModel> {
-    const persistenceModel = UserMapper.toEntity(user);
+    const persistenceModel = UserMapper.toPersistence(user);
     const updatedEntity = await this.repository.save(persistenceModel);
     return UserMapper.toDomain(updatedEntity);
   }

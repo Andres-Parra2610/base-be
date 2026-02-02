@@ -205,23 +205,13 @@ import { ${PASCAL_CASE}Entity } from '../entities/$MODULE_NAME.entity';
 
 export class ${PASCAL_CASE}Mapper {
   static toDomain(entity: ${PASCAL_CASE}Entity): ${PASCAL_CASE}Model {
-    return new ${PASCAL_CASE}Model({
-      id: entity.id,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
-      deletedAt: entity.deletedAt,
-      name: entity.name,
-    });
+    return new ${PASCAL_CASE}Model(entity);
   }
 
-  static toPersistence(model: ${PASCAL_CASE}Model): Partial<${PASCAL_CASE}Entity> {
-    return {
-      id: model.id,
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
-      deletedAt: model.deletedAt,
-      name: model.name,
-    };
+  static toPersistence(domain: ${PASCAL_CASE}Model): ${PASCAL_CASE}Entity {
+    const entity = new ${PASCAL_CASE}Entity();
+    Object.assign(entity, domain);
+    return entity;
   }
 }
 EOL
