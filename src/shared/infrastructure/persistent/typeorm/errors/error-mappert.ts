@@ -5,8 +5,8 @@ import {
   UniqueConstraintError,
 } from '@/src/utils/errors/database.error';
 import { QueryFailedError } from 'typeorm';
-import { PostgresErrorCode } from '../../postgress/postgress-errors';
-import { CONSTRAINT_MESSAGES } from '../../postgress/postgress-constrains';
+import { PostgresErrorCode } from '../../postgres/postgres-errors';
+import { CONSTRAINT_MESSAGES } from '../../postgres/postgres-constrains';
 
 export class TypeOrmErrorMapper {
   static map(error: unknown): never {
