@@ -39,3 +39,15 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=livestock
+
+  livestock-db-test:
+    image: postgres:17.0-alpine
+    restart: always
+    ports:
+      - '6001:5432'
+    volumes:
+      - ./postgres-test:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=livestock_test
