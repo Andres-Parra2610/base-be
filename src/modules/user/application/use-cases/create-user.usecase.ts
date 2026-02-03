@@ -6,7 +6,7 @@ import { ICreateUser } from '../interfaces/create-user.interface';
 import { FindOneRolesUseCase } from '@/src/modules/roles/application/use-cases/find-one-roles.usecase';
 import { UserRoleModel } from '../../domain/models/user-role.model';
 import { IUserRoleRepository } from '../../domain/ports/user-role-repository.port';
-import { ResponseUserInterface } from '../interfaces/response-user.interface';
+import { UserResponse } from '../interfaces/response-user.interface';
 
 export class CreateUserUseCase {
   constructor(
@@ -15,7 +15,7 @@ export class CreateUserUseCase {
     private readonly findRoleByIdUseCase: FindOneRolesUseCase,
   ) {}
 
-  async execute(createUserDto: ICreateUser): Promise<ResponseUserInterface> {
+  async execute(createUserDto: ICreateUser): Promise<UserResponse> {
     UserModel.validatePassword(createUserDto.password || '');
 
     const user = new UserModel({

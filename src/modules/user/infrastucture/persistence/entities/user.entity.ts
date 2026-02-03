@@ -1,5 +1,6 @@
 import { BaseEntity } from '@/src/shared/infrastructure/persistent/typeorm/entity/base-entity';
-import { Column, Entity, Index, Unique } from 'typeorm';
+import { Column, Entity, Index, Unique, OneToOne } from 'typeorm';
+import { UserRoleEntity } from './user-role.entity';
 
 @Entity({ name: 'users' })
 @Unique('UQ_user_email', ['email'])
@@ -16,4 +17,7 @@ export class UserEntity extends BaseEntity {
 
   @Column({ name: 'is_staff', type: 'boolean', nullable: false, default: false })
   isStaff: boolean;
+
+  @OneToOne(() => UserRoleEntity, (userRole) => userRole.user)
+  userRole: UserRoleEntity;
 }

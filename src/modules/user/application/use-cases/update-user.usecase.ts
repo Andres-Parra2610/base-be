@@ -13,6 +13,8 @@ export class UpdateUserUseCase {
       throw new ApplicationError('Usuario no encontrado');
     }
 
+    const userDomain = new UserModel(user);
+
     const { id, password, ...rest } = updateUserDto;
 
     const changes: Partial<UserModel> = {
@@ -24,7 +26,7 @@ export class UpdateUserUseCase {
       changes.password = hashPassword(password);
     }
 
-    const updatedUser = user.cloneWith(changes);
+    const updatedUser = userDomain.cloneWith(changes);
 
     return this.userRepository.update(updatedUser);
   }

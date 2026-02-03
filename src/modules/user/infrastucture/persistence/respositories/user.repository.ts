@@ -11,6 +11,7 @@ import { HandleDbErrors } from '@/src/core/decorators/errors/db-errors.decortato
 import { TypeOrmQueryHelper } from '@/src/shared/infrastructure/persistent/typeorm/filter/typeorm-query-filter';
 import { QueryDto } from '@/src/utils/dto/pagination.dto';
 import { PaginationResponse } from '@/src/shared/infrastructure/types/pagination.type';
+import { UserResponse } from '../../../application/interfaces/response-user.interface';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -30,8 +31,11 @@ export class UserRepository implements IUserRepository {
   }
 
   @HandleDbErrors()
-  async findAll(queryDto: QueryDto): Promise<PaginationResponse<UserModel>> {
+  async findAll(queryDto: QueryDto): Promise<PaginationResponse<UserResponse>> {
     const qb = this.repository.createQueryBuilder('user');
+
+    qb.leftJoinAndSelect('user.userRole', 'userRole');
+    qb.leftJoinAndSelect('userRole.role', 'role');
 
     const allowedFilters = ['fullName', 'email'];
     const allowedSort = ['createdAt', 'fullName'];
@@ -40,7 +44,7 @@ export class UserRepository implements IUserRepository {
 
     const [entities, total] = await queryBuilder.getManyAndCount();
     return {
-      data: entities.map((entity) => UserMapper.toDomain(entity)),
+      data: entities.map((entity) => UserMapper.toResponse(entity)),
       total,
       page: queryDto.page,
       limit: queryDto.limit,
@@ -55,10 +59,16 @@ export class UserRepository implements IUserRepository {
   }
 
   @HandleDbErrors()
-  async findById(id: string): Promise<UserModel | null> {
-    const entity = await this.repository.findOne({ where: { id } });
+  async findById(id: string): Promise<UserResponse | null> {
+    const qb = this.repository.createQueryBuilder('user');
+
+    qb.leftJoinAndSelect('user.userRole', 'userRole');
+    qb.leftJoinAndSelect('userRole.role', 'role');
+    qb.where('user.id = :id', { id });
+
+    const entity = await qb.getOne();
     if (!entity) return null;
-    return UserMapper.toDomain(entity);
+    return UserMapper.toResponse(entity);
   }
 
   @HandleDbErrors()
