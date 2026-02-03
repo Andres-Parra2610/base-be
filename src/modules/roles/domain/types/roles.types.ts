@@ -8,6 +8,7 @@ export enum PermissionResource {
   USER = 'user',
   FARM = 'farm',
   ANIMAL = 'animal',
+  ROLE = 'role',
 }
 
 export enum PermissionAction {

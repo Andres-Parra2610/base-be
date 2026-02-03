@@ -9,25 +9,37 @@ import { DomainError } from '@/src/utils/errors/domain.error';
 
 export interface RolesModelParams extends BaseModelParams {
   id: string;
-  context_type: ContextType;
-  context_id?: string;
+  contextType: ContextType;
   name: string;
   permissions: AppPermissions;
+  canDelete: boolean;
+  contextId?: string;
 }
 
 export class RolesModel extends BaseModel<RolesModelParams> {
-  context_type: ContextType;
-  context_id?: string;
+  contextType: ContextType;
   name: string;
   permissions: AppPermissions;
+  canDelete: boolean;
+  contextId?: string;
 
   constructor(params: RolesModelParams) {
     super(params);
+
     this.validatePermissions(params.permissions);
-    this.context_type = params.context_type;
-    this.context_id = params.context_id;
+    this.validateRoleContext(params.contextType, params.contextId);
+
+    this.contextType = params.contextType;
+    this.contextId = params.contextId;
     this.name = params.name;
     this.permissions = params.permissions;
+    this.canDelete = params.canDelete;
+  }
+
+  private validateRoleContext(contextType: ContextType, contextId?: string) {
+    if (contextType !== ContextType.system && !contextId) {
+      throw new DomainError('Debe proporcionar contextId para el rol');
+    }
   }
 
   private validatePermissions(permissions: AppPermissions) {
