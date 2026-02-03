@@ -5,6 +5,7 @@ import {
   IsEmail,
   IsOptional,
   IsString,
+  IsUUID,
   Matches,
   MinLength,
 } from 'class-validator';
@@ -25,4 +26,7 @@ export class CreateUserDto {
   @IsBoolean()
   @IsOptional()
   isStaff: boolean = false;
+
+  @IsUUID('4')
+  roleId: string;
 }

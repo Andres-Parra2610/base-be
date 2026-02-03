@@ -6,12 +6,14 @@ import { FindOneUserUseCase } from '../application/use-cases/find-one-user.useca
 import { FindAllUserUseCase } from '../application/use-cases/find-all-user.usecase';
 import { FindUserByEmailUseCase } from '../application/use-cases/find-by-email.usecase';
 import { IUserRepository } from '../domain/ports/user-repository.port';
+import { FindOneRolesUseCase } from '../../roles/application/use-cases/find-one-roles.usecase';
 
 export const userUseCaseProviders: Provider[] = [
   {
     provide: CreateUserUseCase,
-    useFactory: (repo: IUserRepository) => new CreateUserUseCase(repo),
-    inject: ['UserRepository'],
+    useFactory: (repo: IUserRepository, findRoleByIdUseCase: FindOneRolesUseCase) =>
+      new CreateUserUseCase(repo, findRoleByIdUseCase),
+    inject: ['UserRepository', FindOneRolesUseCase],
   },
   {
     provide: UpdateUserUseCase,

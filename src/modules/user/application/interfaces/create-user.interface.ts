@@ -3,4 +3,5 @@ export interface ICreateUser {
   email: string;
   password: string;
   isStaff: boolean;
+  roleId: string;
 }
