@@ -26,8 +26,8 @@ export class RolesModel extends BaseModel<RolesModelParams> {
   constructor(params: RolesModelParams) {
     super(params);
 
-    this.validatePermissions(params.permissions);
     this.validateRoleContext(params.contextType, params.contextId);
+    this.validatePermissions(params.permissions);
 
     this.contextType = params.contextType;
     this.contextId = params.contextId;

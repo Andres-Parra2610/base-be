@@ -16,6 +16,7 @@ export class RolesRepository implements IRolesRepository {
   ) {
     this.repository = dataSource.getRepository(RolesEntity);
   }
+
   create(entity: RolesModel): Promise<RolesModel> {
     throw new Error('Method not implemented.');
   }
@@ -29,6 +30,10 @@ export class RolesRepository implements IRolesRepository {
     throw new Error('Method not implemented.');
   }
   findAll(queryDto: QueryDto): Promise<PaginationResponse<RolesModel>> {
+    throw new Error('Method not implemented.');
+  }
+
+  existRoleByNameAndContext(name: string, contextId?: string): Promise<boolean> {
     throw new Error('Method not implemented.');
   }
 }
