@@ -5,6 +5,9 @@ import { RolesModel } from '../../../domain/models/roles.model';
 import { RolesEntity } from '../entities/roles.entity';
 import { PaginationResponse } from '@/src/shared/infrastructure/types/pagination.type';
 import { QueryDto } from '@/src/utils/dto/pagination.dto';
+import { HandleDbErrors } from '@/src/core/decorators/errors/db-errors.decortator';
+import { RolesMapper } from '../mappers/roles.mapper';
+import { TypeOrmQueryHelper } from '@/src/shared/infrastructure/persistent/typeorm/filter/typeorm-query-filter';
 
 @Injectable()
 export class RolesRepository implements IRolesRepository {
@@ -17,23 +20,67 @@ export class RolesRepository implements IRolesRepository {
     this.repository = dataSource.getRepository(RolesEntity);
   }
 
-  create(entity: RolesModel): Promise<RolesModel> {
-    throw new Error('Method not implemented.');
-  }
-  update(entity: RolesModel): Promise<RolesModel> {
-    throw new Error('Method not implemented.');
-  }
-  delete(id: string, hard?: boolean): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-  findById(id: string): Promise<RolesModel | null> {
-    throw new Error('Method not implemented.');
-  }
-  findAll(queryDto: QueryDto): Promise<PaginationResponse<RolesModel>> {
-    throw new Error('Method not implemented.');
+  @HandleDbErrors()
+  async create(entity: RolesModel): Promise<RolesModel> {
+    const persistenceModel = RolesMapper.toPersistence(entity);
+    const savedEntity = await this.repository.save(persistenceModel);
+    return RolesMapper.toDomain(savedEntity);
   }
 
-  existRoleByNameAndContext(name: string, contextId?: string): Promise<boolean> {
-    throw new Error('Method not implemented.');
+  @HandleDbErrors()
+  async update(entity: RolesModel): Promise<RolesModel> {
+    const persistenceModel = RolesMapper.toPersistence(entity);
+    const savedEntity = await this.repository.save(persistenceModel);
+    return RolesMapper.toDomain(savedEntity);
+  }
+
+  @HandleDbErrors()
+  async delete(id: string, hard?: boolean): Promise<void> {
+    if (hard) {
+      await this.repository.delete(id);
+    } else {
+      await this.repository.update(id, { deletedAt: new Date() });
+    }
+  }
+
+  @HandleDbErrors()
+  async findById(id: string): Promise<RolesModel | null> {
+    const entity = await this.repository.findOneBy({ id });
+    if (!entity) return null;
+    return RolesMapper.toDomain(entity);
+  }
+
+  @HandleDbErrors()
+  async findAll(queryDto: QueryDto): Promise<PaginationResponse<RolesModel>> {
+    const qb = this.repository.createQueryBuilder('role');
+
+    const allowedFilters = ['name', 'contextType'];
+    const allowedSort = ['createdAt', 'name'];
+
+    const queryBuilder = TypeOrmQueryHelper.applyRequest(qb, queryDto, allowedFilters, allowedSort);
+
+    const [entities, total] = await queryBuilder.getManyAndCount();
+    return {
+      data: entities.map((entity) => RolesMapper.toDomain(entity)),
+      total,
+      page: queryDto.page,
+      limit: queryDto.limit,
+    };
+  }
+
+  @HandleDbErrors()
+  async existRoleByNameAndContext(name: string, contextId?: string): Promise<boolean> {
+    const qb = this.repository.createQueryBuilder('role');
+
+    qb.where('role.name = :name', { name });
+
+    if (contextId) {
+      qb.andWhere('role.context_id = :contextId', { contextId });
+    } else {
+      qb.andWhere('role.context_id IS NULL');
+    }
+
+    const result = await qb.getCount();
+    return result > 0;
   }
 }
