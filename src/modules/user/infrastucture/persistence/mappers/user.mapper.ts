@@ -24,6 +24,7 @@ export class UserMapper {
     if (userEntity.userRole && userEntity.userRole.role) {
       role = RolesMapper.toDomain(userEntity.userRole.role);
     }
+
     return {
       id: userEntity.id,
       createdAt: userEntity.createdAt,

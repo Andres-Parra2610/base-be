@@ -4,6 +4,7 @@ import { DatabaseModule } from '@/src/shared/infrastructure/persistent/typeorm/d
 import { UserController } from './infrastucture/http/user.controller';
 import { userUseCaseProviders } from './providers/user-usecase.providers';
 import { RolesModule } from '../roles/roles.module';
+import { UserRoleRepository } from './infrastucture/persistence/respositories/user-role.repository';
 
 @Module({
   imports: [DatabaseModule, RolesModule],
@@ -11,6 +12,10 @@ import { RolesModule } from '../roles/roles.module';
     {
       provide: 'UserRepository',
       useClass: UserRepository,
+    },
+    {
+      provide: 'UserRoleRepository',
+      useClass: UserRoleRepository,
     },
     ...userUseCaseProviders,
   ],

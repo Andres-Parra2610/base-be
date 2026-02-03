@@ -16,7 +16,9 @@ export class DeleteUserUseCase {
   async execute(id: string): Promise<DeleteUserResponse> {
     const user = await this.userRepository.findById(id);
     if (!user) throw new ApplicationError('Usuario no encontrado');
-    await this.userRoleRepository.delete(id, user.role.id);
+    if (user.role) {
+      await this.userRoleRepository.delete(id, user.role.id);
+    }
     await this.userRepository.delete(id);
     return { id, message: 'Usuario eliminado correctamente' };
   }
