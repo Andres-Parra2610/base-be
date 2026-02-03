@@ -3,8 +3,8 @@ import { BaseEntity } from '@/src/shared/infrastructure/persistent/typeorm/entit
 import { ContextType, AppPermissions } from '../../../domain/types/roles.types';
 
 @Entity('roles')
-@Unique('UQ_roles_name_context', ['name', 'context_id'])
-@Index('IDX_roles_context', ['context_id'])
+@Unique('UQ_roles_name_context', ['name', 'contextId'])
+@Index('IDX_roles_context', ['contextId'])
 export class RolesEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 100 })
   name: string;
