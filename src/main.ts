@@ -47,7 +47,7 @@ async function bootstrap() {
   const logger = app.get(Logger);
   app.useLogger(logger);
 
-  logger.log(`Base Backend is running on port ${env.PORT}`);
+  logger.debug(`Livestock Backend is running on port ${env.PORT}`);
   await app.listen(env.PORT, '0.0.0.0');
 }
 void bootstrap();
