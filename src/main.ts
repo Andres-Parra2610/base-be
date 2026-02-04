@@ -25,7 +25,10 @@ async function bootstrap() {
       querystringParser: (str) => qs.parse(str),
     }),
     {
-      cors: true,
+      cors: {
+        origin: true,
+        credentials: true,
+      },
     },
   );
 
