@@ -34,8 +34,8 @@ export class CreateUserUseCase {
       roleId: role.id,
     });
 
-    await this.userRoleRepository.create(userRole);
     const userCreated = await this.userRepository.create(user);
+    await this.userRoleRepository.create(userRole);
     return {
       ...userCreated,
       role: role,

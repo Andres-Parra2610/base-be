@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsBoolean, IsEnum, IsObject } from 'class-validator';
+import { IsString, IsNotEmpty, IsBoolean, IsEnum, IsObject, IsOptional } from 'class-validator';
 import { AppPermissions, ContextType } from '../../../domain/types/roles.types';
 
 export class CreateRolesDto {
@@ -15,7 +15,7 @@ export class CreateRolesDto {
   permissions: AppPermissions;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   contextId?: string;
 
   @IsBoolean()
