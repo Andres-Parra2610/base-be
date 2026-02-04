@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import fastifyCookie from '@fastify/cookie';
 import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { apiReference } from '@scalar/nestjs-api-reference';
 import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
 import { env } from './config/env';
@@ -21,9 +23,28 @@ async function bootstrap() {
       cors: true,
     },
   );
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Livestock API')
+    .setDescription('API documentation for Livestock project')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+
+  app.use(
+    '/reference',
+    apiReference({
+      content: swaggerDocument,
+      withFastify: true,
+    }),
+  );
+
   await app.register(fastifyCookie as any, {
     secret: env.JWT_SECRET,
   });
+
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' },
