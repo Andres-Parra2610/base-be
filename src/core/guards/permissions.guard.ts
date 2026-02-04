@@ -31,7 +31,7 @@ export class PermissionsGuard implements CanActivate {
     const { user } = context.switchToHttp().getRequest();
 
     if (!user || !user.id) {
-      throw new UnauthorizedException('User not found in context');
+      throw new UnauthorizedException('Usuario no encontrado en el contexto');
     }
 
     // Fetch User Role and Permissions
@@ -42,7 +42,7 @@ export class PermissionsGuard implements CanActivate {
     });
 
     if (!userRole || !userRole.role) {
-      throw new ForbiddenException('User has no assigned role');
+      throw new ForbiddenException('El usuario no tiene un rol asignado');
     }
 
     const rolePermissions = userRole.role.permissions;
@@ -50,9 +50,7 @@ export class PermissionsGuard implements CanActivate {
     // Check if role has permission for resource and action
     const resourcePermissions = rolePermissions[requiredPermission.resource];
     if (!resourcePermissions || !resourcePermissions[requiredPermission.action]) {
-      throw new ForbiddenException(
-        `Insufficient permissions for ${requiredPermission.resource}:${requiredPermission.action}`,
-      );
+      throw new ForbiddenException(`No tienes permisos para acceder a este recurso`);
     }
 
     return true;

@@ -17,6 +17,8 @@ import { DeleteUserUseCase } from '../../application/use-cases/delete-user.useca
 import { FindOneUserUseCase } from '../../application/use-cases/find-one-user.usecase';
 import { FindAllUserUseCase } from '../../application/use-cases/find-all-user.usecase';
 import { QueryDto } from '@/src/utils/dto/pagination.dto';
+import { RequirePermissions } from '@/src/core/decorators/require-permissions.decorator';
+import { PermissionAction, PermissionResource } from '@/src/modules/roles/domain/types/roles.types';
 
 @Controller('user')
 export class UserController {
@@ -29,25 +31,30 @@ export class UserController {
   ) {}
 
   @Post()
+  @RequirePermissions(PermissionResource.USER, PermissionAction.CREATE)
   async createUser(@Body() createUserDto: CreateUserDto) {
     return await this.createUserUseCase.execute(createUserDto);
   }
   @Get()
+  @RequirePermissions(PermissionResource.USER, PermissionAction.READ)
   async findAllUser(@Query() queryDto: QueryDto) {
     return await this.findAllUserUseCase.execute(queryDto);
   }
 
   @Get(':id')
+  @RequirePermissions(PermissionResource.USER, PermissionAction.READ)
   async findOneUser(@Param('id', ParseUUIDPipe) id: string) {
     return await this.findOneUserUseCase.execute(id);
   }
 
   @Put(':id')
+  @RequirePermissions(PermissionResource.USER, PermissionAction.UPDATE)
   async updateUser(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
     return await this.updateUserUseCase.execute({ ...updateUserDto, id });
   }
 
   @Delete(':id')
+  @RequirePermissions(PermissionResource.USER, PermissionAction.DELETE)
   async deleteUser(@Param('id', ParseUUIDPipe) id: string) {
     return await this.deleteUserUseCase.execute(id);
   }
