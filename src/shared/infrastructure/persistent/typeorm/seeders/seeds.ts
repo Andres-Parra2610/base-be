@@ -1,3 +1,4 @@
+import { roleSeeder } from './roles.seeder';
 import { dataSource } from '../database.providers';
 import { citySeeder } from './city.seeder';
 import { stateSeeder } from './state.seeder';
@@ -8,6 +9,7 @@ void (async () => {
   try {
     await stateSeeder(source);
     await citySeeder(source);
+    await roleSeeder(source);
     await userSeeder(source);
     console.log('\x1b[32m%s\x1b[0m', 'Seeds inicializados correctamente');
   } catch (error) {
