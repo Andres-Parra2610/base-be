@@ -18,6 +18,6 @@ export class RolesEntity extends BaseEntity {
   @Column({ name: 'context_id', type: 'uuid', nullable: true })
   contextId?: string;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ name: 'can_delete', type: 'boolean', default: true })
   canDelete: boolean;
 }
