@@ -8,6 +8,7 @@ import { QueryDto } from '@/src/utils/dto/pagination.dto';
 import { HandleDbErrors } from '@/src/core/decorators/errors/db-errors.decortator';
 import { RolesMapper } from '../mappers/roles.mapper';
 import { TypeOrmQueryHelper } from '@/src/shared/infrastructure/persistent/typeorm/filter/typeorm-query-filter';
+import { IRequestUser } from '@/src/core/decorators/user.decorator';
 
 @Injectable()
 export class RolesRepository implements IRolesRepository {
@@ -44,18 +45,34 @@ export class RolesRepository implements IRolesRepository {
   }
 
   @HandleDbErrors()
-  async findById(id: string): Promise<RolesModel | null> {
-    const entity = await this.repository.findOneBy({ id });
-    if (!entity) return null;
-    return RolesMapper.toDomain(entity);
+  async findById(id: string, user: IRequestUser): Promise<RolesModel | null> {
+    const qb = this.repository.createQueryBuilder('role');
+
+    let roleEntity: RolesEntity | null = null;
+
+    if (user.role?.contextId) {
+      roleEntity = await qb
+        .where('role.context_id = :contextId', { contextId: user.role.contextId })
+        .andWhere('role.id = :id', { id })
+        .getOne();
+    } else {
+      roleEntity = await qb.where('role.id = :id', { id }).getOne();
+    }
+
+    if (!roleEntity) return null;
+    return RolesMapper.toDomain(roleEntity);
   }
 
   @HandleDbErrors()
-  async findAll(queryDto: QueryDto): Promise<PaginationResponse<RolesModel>> {
+  async findAll(queryDto: QueryDto, user: IRequestUser): Promise<PaginationResponse<RolesModel>> {
     const qb = this.repository.createQueryBuilder('role');
 
     const allowedFilters = ['name', 'contextType'];
     const allowedSort = ['createdAt', 'name'];
+
+    if (user.role?.contextId) {
+      qb.andWhere('role.context_id = :contextId', { contextId: user.role.contextId });
+    }
 
     const queryBuilder = TypeOrmQueryHelper.applyRequest(qb, queryDto, allowedFilters, allowedSort);
 

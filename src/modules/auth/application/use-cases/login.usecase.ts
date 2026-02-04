@@ -30,11 +30,13 @@ export class LoginUseCase {
     const token = this.repository.generateToken({
       id: user.id,
       email: user.email,
+      isStaff: user.isStaff,
     });
 
     const refreshToken = this.repository.generateRefreshToken({
       id: user.id,
       email: user.email,
+      isStaff: user.isStaff,
     });
 
     return {

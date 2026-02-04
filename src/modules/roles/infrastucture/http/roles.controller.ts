@@ -19,6 +19,7 @@ import { UpdateRolesDto } from './dto/update-roles.dto';
 import { QueryDto } from '@/src/utils/dto/pagination.dto';
 import { RequirePermissions } from '@/src/core/decorators/require-permissions.decorator';
 import { PermissionAction, PermissionResource } from '../../domain/types/roles.types';
+import { IRequestUser, User } from '@/src/core/decorators/user.decorator';
 
 @Controller('roles')
 export class RolesController {
@@ -38,14 +39,14 @@ export class RolesController {
 
   @Get()
   @RequirePermissions(PermissionResource.ROLE, PermissionAction.READ)
-  async findAll(@Query() query: QueryDto) {
-    return await this.findAllUseCase.execute(query);
+  async findAll(@Query() query: QueryDto, @User() user: IRequestUser) {
+    return await this.findAllUseCase.execute(query, user);
   }
 
   @Get(':id')
   @RequirePermissions(PermissionResource.ROLE, PermissionAction.READ)
-  async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.findOneUseCase.execute(id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string, @User() user: IRequestUser) {
+    return await this.findOneUseCase.execute(id, user);
   }
 
   @Put(':id')
