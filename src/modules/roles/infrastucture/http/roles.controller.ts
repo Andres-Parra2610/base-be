@@ -37,6 +37,7 @@ export class RolesController {
     const role = {
       ...dto,
       contextId: user.role?.contextId,
+      contextType: user.role!.contextType,
     };
     return await this.createUseCase.execute(role);
   }
@@ -63,6 +64,7 @@ export class RolesController {
     const role = {
       ...dto,
       contextId: user.role?.contextId,
+      contextType: user.role!.contextType,
     };
     return await this.updateUseCase.execute({ ...role, id });
   }
