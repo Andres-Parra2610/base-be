@@ -7,13 +7,16 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { FastifyRequest } from 'fastify';
+import { DataSource } from 'typeorm';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { ITokenPort } from '@/src/modules/auth/application/ports/token.port';
+import { UserRoleEntity } from '@/src/modules/user/infrastucture/persistence/entities/user-role.entity';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     @Inject('TokenService') private readonly tokenService: ITokenPort,
+    @Inject('DATA_SOURCE') private readonly dataSource: DataSource,
     private readonly reflector: Reflector,
   ) {}
 
@@ -35,12 +38,22 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      // We verify the access token specifically
       const payload = this.tokenService.verifyToken(token);
-      // Attach user payload to request for downstream use
-      request['user'] = payload;
-    } catch {
-      throw new UnauthorizedException('Invalid token');
+
+      const userId = payload.id || payload['sub'];
+      if (!userId) {
+        throw new UnauthorizedException('Invalid token payload');
+      }
+
+      const userRole = await this.getUserRole(userId);
+      request['user'] = {
+        ...payload,
+        role: userRole?.role || null,
+        permissions: userRole?.role?.permissions || {},
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) throw error;
+      throw new UnauthorizedException('Invalid token or session');
     }
     return true;
   }
@@ -60,5 +73,12 @@ export class AuthGuard implements CanActivate {
     }
 
     return undefined;
+  }
+  private async getUserRole(userId: string): Promise<UserRoleEntity | null> {
+    const userRoleRepo = this.dataSource.getRepository(UserRoleEntity);
+    return await userRoleRepo.findOne({
+      where: { userId: userId },
+      relations: ['role'],
+    });
   }
 }
