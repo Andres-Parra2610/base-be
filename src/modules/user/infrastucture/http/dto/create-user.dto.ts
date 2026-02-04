@@ -7,16 +7,19 @@ import {
   IsString,
   IsUUID,
   Matches,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
   @MinLength(3)
+  @MaxLength(100)
   @Matches(fullNameRegex)
   fullName: string;
 
   @IsDefined()
+  @IsEmail()
   email: string;
 
   @IsString()

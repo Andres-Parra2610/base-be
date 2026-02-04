@@ -13,6 +13,11 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import qs from 'qs';
 
 async function bootstrap() {
+  try {
+    const metadata = require('./metadata');
+    await SwaggerModule.loadPluginMetadata(metadata.default);
+  } catch (e) {}
+
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({
@@ -23,6 +28,8 @@ async function bootstrap() {
       cors: true,
     },
   );
+
+  app.setGlobalPrefix('api/v1');
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Livestock API')
@@ -36,7 +43,9 @@ async function bootstrap() {
   app.use(
     '/reference',
     apiReference({
-      content: swaggerDocument,
+      spec: {
+        content: swaggerDocument,
+      },
       withFastify: true,
     }),
   );
@@ -51,8 +60,6 @@ async function bootstrap() {
     }),
   );
 
-  // Set global prefix for all routes
-  app.setGlobalPrefix('api/v1');
   app.useGlobalFilters(new AllExceptionsFilter());
 
   app.useGlobalPipes(
