@@ -19,7 +19,7 @@ export class UserMapper {
     return entity;
   }
 
-  static toResponse(userEntity: UserEntity): UserResponse {
+  static toResponse(userEntity: UserEntity, options?: { withPassword?: boolean }): UserResponse {
     let role: RolesModel | null = null;
     if (userEntity.userRole && userEntity.userRole.role) {
       role = RolesMapper.toDomain(userEntity.userRole.role);
@@ -34,6 +34,7 @@ export class UserMapper {
       email: userEntity.email,
       isStaff: userEntity.isStaff,
       role: role,
+      password: options?.withPassword ? userEntity.password : undefined,
     };
   }
 }

@@ -6,4 +6,5 @@ export interface UserResponse extends ResponseBaseInterface {
   email: string;
   isStaff: boolean;
   role: RolesModel | null;
+  password?: string;
 }

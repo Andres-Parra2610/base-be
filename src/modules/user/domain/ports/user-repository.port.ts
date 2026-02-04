@@ -7,5 +7,5 @@ export interface IFindUserByEmailOptions {
 }
 
 export interface IUserRepository extends IBaseRepository<UserModel, UserResponse> {
-  findByEmail(email: string, options?: IFindUserByEmailOptions): Promise<UserModel | null>;
+  findByEmail(email: string, options?: IFindUserByEmailOptions): Promise<UserResponse | null>;
 }

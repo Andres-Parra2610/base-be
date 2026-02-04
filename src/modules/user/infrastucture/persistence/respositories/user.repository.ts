@@ -52,10 +52,19 @@ export class UserRepository implements IUserRepository {
   }
 
   @HandleDbErrors()
-  async findByEmail(email: string, options?: IFindUserByEmailOptions): Promise<UserModel | null> {
-    const entity = await this.repository.findOne({ where: { email } });
+  async findByEmail(
+    email: string,
+    options?: IFindUserByEmailOptions,
+  ): Promise<UserResponse | null> {
+    const qb = this.repository.createQueryBuilder('user');
+
+    qb.leftJoinAndSelect('user.userRole', 'userRole');
+    qb.leftJoinAndSelect('userRole.role', 'role');
+    qb.where('user.email = :email', { email });
+
+    const entity = await qb.getOne();
     if (!entity) return null;
-    return UserMapper.toDomain(entity, options);
+    return UserMapper.toResponse(entity, options);
   }
 
   @HandleDbErrors()
