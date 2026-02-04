@@ -33,8 +33,12 @@ export class RolesController {
 
   @Post()
   @RequirePermissions(PermissionResource.ROLE, PermissionAction.CREATE)
-  async create(@Body() dto: CreateRolesDto) {
-    return await this.createUseCase.execute(dto);
+  async create(@Body() dto: CreateRolesDto, @User() user: IRequestUser) {
+    const role = {
+      ...dto,
+      contextId: user.role?.contextId,
+    };
+    return await this.createUseCase.execute(role);
   }
 
   @Get()
@@ -51,8 +55,16 @@ export class RolesController {
 
   @Put(':id')
   @RequirePermissions(PermissionResource.ROLE, PermissionAction.UPDATE)
-  async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateRolesDto) {
-    return await this.updateUseCase.execute({ ...dto, id });
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateRolesDto,
+    @User() user: IRequestUser,
+  ) {
+    const role = {
+      ...dto,
+      contextId: user.role?.contextId,
+    };
+    return await this.updateUseCase.execute({ ...role, id });
   }
 
   @Delete(':id')

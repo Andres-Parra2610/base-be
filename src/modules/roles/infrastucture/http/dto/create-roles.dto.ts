@@ -14,10 +14,6 @@ export class CreateRolesDto {
   @IsNotEmpty()
   permissions: AppPermissions;
 
-  @IsString()
-  @IsOptional()
-  contextId?: string;
-
   @IsBoolean()
   @IsNotEmpty()
   canDelete: boolean = true;
