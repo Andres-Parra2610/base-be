@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsBoolean, IsObject, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsBoolean, IsObject, IsOptional, MaxLength } from 'class-validator';
 import { AppPermissions } from '../../../domain/types/roles.types';
 
 export class CreateRolesDto {
@@ -13,4 +13,9 @@ export class CreateRolesDto {
   @IsBoolean()
   @IsOptional()
   canDelete: boolean = true;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  description?: string;
 }

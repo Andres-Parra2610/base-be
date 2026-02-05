@@ -11,6 +11,7 @@ export interface RolesModelParams extends BaseModelParams {
   id: string;
   contextType: ContextType;
   name: string;
+  description?: string;
   permissions: AppPermissions;
   canDelete: boolean;
   contextId?: string;
@@ -19,6 +20,7 @@ export interface RolesModelParams extends BaseModelParams {
 export class RolesModel extends BaseModel<RolesModelParams> {
   contextType: ContextType;
   name: string;
+  description?: string;
   permissions: AppPermissions;
   canDelete: boolean;
   contextId?: string;
@@ -27,11 +29,13 @@ export class RolesModel extends BaseModel<RolesModelParams> {
     super(params);
 
     this.validateRoleContext(params.contextType, params.contextId);
+    this.validateDescription(params.description);
     this.validatePermissions(params.permissions);
 
     this.contextType = params.contextType;
     this.contextId = params.contextId;
     this.name = params.name;
+    this.description = params.description;
     this.permissions = params.permissions;
     this.canDelete = params.canDelete;
   }
@@ -39,6 +43,12 @@ export class RolesModel extends BaseModel<RolesModelParams> {
   private validateRoleContext(contextType: ContextType, contextId?: string) {
     if (contextType !== ContextType.system && !contextId) {
       throw new DomainError('Debe proporcionar contextId para el rol');
+    }
+  }
+
+  private validateDescription(description?: string) {
+    if (description && description.length > 255) {
+      throw new DomainError('La descripción no puede exceder los 255 caracteres');
     }
   }
 

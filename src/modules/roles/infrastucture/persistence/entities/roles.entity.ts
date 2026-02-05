@@ -20,4 +20,7 @@ export class RolesEntity extends BaseEntity {
 
   @Column({ name: 'can_delete', type: 'boolean', default: true })
   canDelete: boolean;
+
+  @Column({ name: 'description', type: 'varchar', length: 255, nullable: true })
+  description?: string;
 }
