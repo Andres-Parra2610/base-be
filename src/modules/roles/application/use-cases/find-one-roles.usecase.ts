@@ -6,7 +6,7 @@ import { IRequestUser } from '@/src/core/decorators/user.decorator';
 export class FindOneRolesUseCase {
   constructor(private readonly repository: IRolesRepository) {}
 
-  async execute(id: string, user: IRequestUser): Promise<RolesModel> {
+  async execute(id: string, user?: IRequestUser): Promise<RolesModel> {
     const role = await this.repository.findById(id, user);
     if (!role) {
       throw new ApplicationError(`Rol no encontrado`);

@@ -45,12 +45,12 @@ export class RolesRepository implements IRolesRepository {
   }
 
   @HandleDbErrors()
-  async findById(id: string, user: IRequestUser): Promise<RolesModel | null> {
+  async findById(id: string, user?: IRequestUser): Promise<RolesModel | null> {
     const qb = this.repository.createQueryBuilder('role');
 
     let roleEntity: RolesEntity | null = null;
 
-    if (user.role?.contextId) {
+    if (user?.role?.contextId) {
       roleEntity = await qb
         .where('role.context_id = :contextId', { contextId: user.role.contextId })
         .andWhere('role.id = :id', { id })

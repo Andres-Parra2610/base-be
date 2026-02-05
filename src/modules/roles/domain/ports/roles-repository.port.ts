@@ -8,6 +8,6 @@ export interface IRolesRepository {
   update(entity: RolesModel): Promise<RolesModel>;
   delete(id: string, hard?: boolean): Promise<void>;
   findAll(queryDto: QueryDto, user: IRequestUser): Promise<PaginationResponse<RolesModel>>;
-  findById(id: string, user: IRequestUser): Promise<RolesModel | null>;
+  findById(id: string, user?: IRequestUser): Promise<RolesModel | null>;
   existRoleByNameAndContext(name: string, contextId?: string): Promise<boolean>;
 }

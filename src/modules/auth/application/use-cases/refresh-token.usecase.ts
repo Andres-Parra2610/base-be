@@ -26,11 +26,13 @@ export class RefreshTokenUseCase {
       const newAccessToken = this.tokenService.generateToken({
         id: user.id,
         email: user.email,
+        isStaff: user.isStaff,
       });
 
       const newRefreshToken = this.tokenService.generateRefreshToken({
         id: user.id,
         email: user.email,
+        isStaff: user.isStaff,
       });
 
       return {
