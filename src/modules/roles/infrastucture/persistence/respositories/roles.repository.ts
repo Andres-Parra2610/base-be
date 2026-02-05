@@ -75,7 +75,7 @@ export class RolesRepository implements IRolesRepository {
   ): Promise<PaginationResponse<ResponseRoles>> {
     const qb = this.repository.createQueryBuilder('role');
 
-    const allowedFilters = ['name', 'contextType'];
+    const allowedFilters = ['name'];
     const allowedSort = ['createdAt', 'name'];
 
     if (user.role?.contextId) {
@@ -93,6 +93,7 @@ export class RolesRepository implements IRolesRepository {
       total,
       page: queryDto.page,
       limit: queryDto.limit,
+      totalPages: Math.ceil(total / (queryDto.limit || 1)),
     };
   }
 

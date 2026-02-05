@@ -25,8 +25,6 @@ export class AuthController {
   ) {
     const result = await this.loginUseCase.execute(dto);
 
-    this.logger.debug(result.refreshToken);
-
     if (device === 'web') {
       (res as any).setCookie('access_token', result.token, {
         httpOnly: true,
