@@ -11,9 +11,11 @@ import { DataSource } from 'typeorm';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { ITokenPort } from '@/src/modules/auth/application/ports/token.port';
 import { UserRoleEntity } from '@/src/modules/user/infrastucture/persistence/entities/user-role.entity';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  private readonly logger = new Logger(AuthGuard.name);
   constructor(
     @Inject('TokenService') private readonly tokenService: ITokenPort,
     @Inject('DATA_SOURCE') private readonly dataSource: DataSource,
