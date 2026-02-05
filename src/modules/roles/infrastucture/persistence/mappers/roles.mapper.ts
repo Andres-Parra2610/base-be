@@ -1,3 +1,4 @@
+import { ResponseRoles } from '../../../application/interfaces/response-roles.interface';
 import { RolesModel } from '../../../domain/models/roles.model';
 import { RolesEntity } from '../entities/roles.entity';
 
@@ -10,5 +11,14 @@ export class RolesMapper {
     const entity = new RolesEntity();
     Object.assign(entity, domain);
     return entity;
+  }
+
+  static toResponse(entity: RolesEntity): ResponseRoles {
+    return {
+      ...entity,
+      canDelete: entity.canDelete,
+      totalUsers: entity.totalUsers ?? 0,
+      totalPermissions: Object.values(entity.permissions).filter((value) => value).length,
+    };
   }
 }

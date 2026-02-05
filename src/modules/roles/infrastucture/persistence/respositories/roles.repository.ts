@@ -9,6 +9,7 @@ import { HandleDbErrors } from '@/src/core/decorators/errors/db-errors.decortato
 import { RolesMapper } from '../mappers/roles.mapper';
 import { TypeOrmQueryHelper } from '@/src/shared/infrastructure/persistent/typeorm/filter/typeorm-query-filter';
 import { IRequestUser } from '@/src/core/decorators/user.decorator';
+import { ResponseRoles } from '../../../application/interfaces/response-roles.interface';
 
 @Injectable()
 export class RolesRepository implements IRolesRepository {
@@ -45,7 +46,7 @@ export class RolesRepository implements IRolesRepository {
   }
 
   @HandleDbErrors()
-  async findById(id: string, user?: IRequestUser): Promise<RolesModel | null> {
+  async findById(id: string, user?: IRequestUser): Promise<ResponseRoles | null> {
     const qb = this.repository.createQueryBuilder('role');
 
     let roleEntity: RolesEntity | null = null;
@@ -54,17 +55,24 @@ export class RolesRepository implements IRolesRepository {
       roleEntity = await qb
         .where('role.context_id = :contextId', { contextId: user.role.contextId })
         .andWhere('role.id = :id', { id })
+        .loadRelationCountAndMap('role.totalUsers', 'role.userRoles')
         .getOne();
     } else {
-      roleEntity = await qb.where('role.id = :id', { id }).getOne();
+      roleEntity = await qb
+        .where('role.id = :id', { id })
+        .loadRelationCountAndMap('role.totalUsers', 'role.userRoles')
+        .getOne();
     }
 
     if (!roleEntity) return null;
-    return RolesMapper.toDomain(roleEntity);
+    return RolesMapper.toResponse(roleEntity);
   }
 
   @HandleDbErrors()
-  async findAll(queryDto: QueryDto, user: IRequestUser): Promise<PaginationResponse<RolesModel>> {
+  async findAll(
+    queryDto: QueryDto,
+    user: IRequestUser,
+  ): Promise<PaginationResponse<ResponseRoles>> {
     const qb = this.repository.createQueryBuilder('role');
 
     const allowedFilters = ['name', 'contextType'];
@@ -74,11 +82,14 @@ export class RolesRepository implements IRolesRepository {
       qb.andWhere('role.context_id = :contextId', { contextId: user.role.contextId });
     }
 
+    // Contar cuantos usuarios tiene cada rol
+    qb.loadRelationCountAndMap('role.totalUsers', 'role.userRoles');
+
     const queryBuilder = TypeOrmQueryHelper.applyRequest(qb, queryDto, allowedFilters, allowedSort);
 
     const [entities, total] = await queryBuilder.getManyAndCount();
     return {
-      data: entities.map((entity) => RolesMapper.toDomain(entity)),
+      data: entities.map((entity) => RolesMapper.toResponse(entity)),
       total,
       page: queryDto.page,
       limit: queryDto.limit,

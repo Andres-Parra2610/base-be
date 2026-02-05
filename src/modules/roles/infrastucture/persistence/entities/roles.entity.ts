@@ -1,6 +1,7 @@
-import { Entity, Column, Unique, Index } from 'typeorm';
+import { Entity, Column, Unique, Index, OneToMany } from 'typeorm';
 import { BaseEntity } from '@/src/shared/infrastructure/persistent/typeorm/entity/base-entity';
 import { ContextType, AppPermissions } from '../../../domain/types/roles.types';
+import { UserRoleEntity } from '@/src/modules/user/infrastucture/persistence/entities/user-role.entity';
 
 @Entity('roles')
 @Unique('UQ_roles_name_context', ['name', 'contextId'])
@@ -23,4 +24,9 @@ export class RolesEntity extends BaseEntity {
 
   @Column({ name: 'description', type: 'varchar', length: 255, nullable: true })
   description?: string;
+
+  @OneToMany(() => UserRoleEntity, (userRole) => userRole.role)
+  userRoles: UserRoleEntity[];
+
+  totalUsers?: number;
 }
