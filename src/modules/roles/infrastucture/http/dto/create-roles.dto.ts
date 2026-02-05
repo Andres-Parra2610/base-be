@@ -1,11 +1,11 @@
 import { IsString, IsNotEmpty, IsBoolean, IsObject, IsOptional, MaxLength } from 'class-validator';
 import { AppPermissions } from '../../../domain/types/roles.types';
-import { Transform } from 'class-transformer';
+import { SanitizeString } from '@/src/core/decorators/sanitize-string.decorator';
 
 export class CreateRolesDto {
   @IsString()
   @IsNotEmpty()
-  @Transform(({ value }: { value: string }) => value.trim().toLowerCase())
+  @SanitizeString()
   name: string;
 
   @IsObject()

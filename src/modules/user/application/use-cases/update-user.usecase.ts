@@ -9,6 +9,7 @@ import { UserRoleModel } from '../../domain/models/user-role.model';
 import { generateUuidV4 } from '@/src/utils/uuid/generate-uuid';
 import { UserResponse } from '../interfaces/response-user.interface';
 import { RolesModel } from '@/src/modules/roles/domain/models/roles.model';
+import { ResponseRoles } from '@/src/modules/roles/application/interfaces/response-roles.interface';
 
 export class UpdateUserUseCase {
   constructor(
@@ -36,7 +37,7 @@ export class UpdateUserUseCase {
       changes.password = hashPassword(password);
     }
 
-    let role: RolesModel | null = null;
+    let role: ResponseRoles | null = null;
 
     //Si cambia el rol, actualizar el rol del usuario
     if (updateUserDto.roleId && user.role?.id && updateUserDto.roleId !== user.role.id) {
