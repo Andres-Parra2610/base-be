@@ -1,4 +1,5 @@
 import { ResponseBaseInterface } from '@/src/shared/application/interfaces/response-base-interface';
+import { ContextType } from '../../domain/types/roles.types';
 
 export interface ResponseRoles extends ResponseBaseInterface {
   name: string;
@@ -7,4 +8,6 @@ export interface ResponseRoles extends ResponseBaseInterface {
   description?: string;
   totalUsers?: number;
   totalPermissions?: number;
+  contextType: ContextType;
+  contextId?: string;
 }

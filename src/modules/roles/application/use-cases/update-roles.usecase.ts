@@ -11,6 +11,11 @@ export class UpdateRolesUseCase {
     if (!role) {
       throw new ApplicationError('Rol no encontrado');
     }
+    const rolModel = new RolesModel({
+      ...role,
+      contextId: role.contextId,
+      contextType: role.contextType,
+    });
 
     //Verificar si el nombre cambia y si existe otro rol con el mismo nombre
     if (input.name && role.name !== input.name) {
@@ -20,7 +25,7 @@ export class UpdateRolesUseCase {
       }
     }
 
-    const updatedRole = role.cloneWith(input);
+    const updatedRole = rolModel.cloneWith(input);
     return this.repository.update(updatedRole);
   }
 }
