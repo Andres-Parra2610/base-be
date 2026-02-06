@@ -1,3 +1,4 @@
+import { SanitizeString } from '@/src/core/decorators/sanitize-string.decorator';
 import { fullNameRegex } from '@/src/utils/regex/validators.regex';
 import {
   IsBoolean,
@@ -13,6 +14,7 @@ import {
 
 export class CreateUserDto {
   @IsString()
+  @SanitizeString()
   @MinLength(3)
   @MaxLength(100)
   @Matches(fullNameRegex)
@@ -20,6 +22,7 @@ export class CreateUserDto {
 
   @IsDefined()
   @IsEmail()
+  @SanitizeString()
   email: string;
 
   @IsString()

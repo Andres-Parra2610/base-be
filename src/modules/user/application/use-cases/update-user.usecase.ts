@@ -54,6 +54,7 @@ export class UpdateUserUseCase {
     }
 
     const updatedUser = userDomain.cloneWith(changes);
+    await this.userRepository.update(updatedUser);
 
     return {
       ...updatedUser,

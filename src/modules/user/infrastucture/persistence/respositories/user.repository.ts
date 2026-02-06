@@ -45,6 +45,11 @@ export class UserRepository implements IUserRepository {
       qb.andWhere('role.context_id = :contextId', { contextId: user.role.contextId });
     }
 
+    //Exlcuir el usuario actual
+    if (user?.id) {
+      qb.andWhere('user.id != :id', { id: user.id });
+    }
+
     const allowedFilters = ['fullName', 'email'];
     const allowedSort = ['createdAt', 'fullName'];
 
