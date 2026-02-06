@@ -48,6 +48,12 @@ export class RolesController {
     return await this.findAllUseCase.execute(query, user);
   }
 
+  @Get('select')
+  @RequirePermissions(PermissionResource.ROLE, PermissionAction.READ)
+  async findSelectList(@User() user: IRequestUser) {
+    return await this.findAllUseCase.findSelectList(user);
+  }
+
   @Get(':id')
   @RequirePermissions(PermissionResource.ROLE, PermissionAction.READ)
   async findOne(@Param('id', ParseUUIDPipe) id: string, @User() user: IRequestUser) {

@@ -19,6 +19,7 @@ import { FindAllUserUseCase } from '../../application/use-cases/find-all-user.us
 import { QueryDto } from '@/src/utils/dto/pagination.dto';
 import { RequirePermissions } from '@/src/core/decorators/require-permissions.decorator';
 import { PermissionAction, PermissionResource } from '@/src/modules/roles/domain/types/roles.types';
+import { IRequestUser, User } from '@/src/core/decorators/user.decorator';
 
 @Controller('user')
 export class UserController {
@@ -37,14 +38,14 @@ export class UserController {
   }
   @Get()
   @RequirePermissions(PermissionResource.USER, PermissionAction.READ)
-  async findAllUser(@Query() queryDto: QueryDto) {
-    return await this.findAllUserUseCase.execute(queryDto);
+  async findAllUser(@Query() queryDto: QueryDto, @User() user: IRequestUser) {
+    return await this.findAllUserUseCase.execute(queryDto, user);
   }
 
   @Get(':id')
   @RequirePermissions(PermissionResource.USER, PermissionAction.READ)
-  async findOneUser(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.findOneUserUseCase.execute(id);
+  async findOneUser(@Param('id', ParseUUIDPipe) id: string, @User() user: IRequestUser) {
+    return await this.findOneUserUseCase.execute(id, user);
   }
 
   @Put(':id')

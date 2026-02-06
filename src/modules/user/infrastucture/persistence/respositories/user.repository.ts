@@ -12,6 +12,7 @@ import { TypeOrmQueryHelper } from '@/src/shared/infrastructure/persistent/typeo
 import { QueryDto } from '@/src/utils/dto/pagination.dto';
 import { PaginationResponse } from '@/src/shared/infrastructure/types/pagination.type';
 import { UserResponse } from '../../../application/interfaces/response-user.interface';
+import { IRequestUser } from '@/src/core/decorators/user.decorator';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -31,11 +32,18 @@ export class UserRepository implements IUserRepository {
   }
 
   @HandleDbErrors()
-  async findAll(queryDto: QueryDto): Promise<PaginationResponse<UserResponse>> {
+  async findAll(
+    queryDto: QueryDto,
+    user?: IRequestUser,
+  ): Promise<PaginationResponse<UserResponse>> {
     const qb = this.repository.createQueryBuilder('user');
 
     qb.leftJoinAndSelect('user.userRole', 'userRole');
     qb.leftJoinAndSelect('userRole.role', 'role');
+
+    if (user?.role?.contextId) {
+      qb.andWhere('role.context_id = :contextId', { contextId: user.role.contextId });
+    }
 
     const allowedFilters = ['fullName', 'email'];
     const allowedSort = ['createdAt', 'fullName'];
@@ -68,12 +76,16 @@ export class UserRepository implements IUserRepository {
   }
 
   @HandleDbErrors()
-  async findById(id: string): Promise<UserResponse | null> {
+  async findById(id: string, user?: IRequestUser): Promise<UserResponse | null> {
     const qb = this.repository.createQueryBuilder('user');
 
     qb.leftJoinAndSelect('user.userRole', 'userRole');
     qb.leftJoinAndSelect('userRole.role', 'role');
     qb.where('user.id = :id', { id });
+
+    if (user?.role?.contextId) {
+      qb.andWhere('role.context_id = :contextId', { contextId: user.role.contextId });
+    }
 
     const entity = await qb.getOne();
     if (!entity) return null;
