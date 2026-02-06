@@ -10,6 +10,7 @@ import { RolesMapper } from '../mappers/roles.mapper';
 import { TypeOrmQueryHelper } from '@/src/shared/infrastructure/persistent/typeorm/filter/typeorm-query-filter';
 import { IRequestUser } from '@/src/core/decorators/user.decorator';
 import { ResponseRoles } from '../../../application/interfaces/response-roles.interface';
+import { SelectOptionDto } from '@/src/utils/dto/select.dto';
 
 @Injectable()
 export class RolesRepository implements IRolesRepository {
@@ -20,6 +21,18 @@ export class RolesRepository implements IRolesRepository {
     private readonly dataSource: DataSource,
   ) {
     this.repository = dataSource.getRepository(RolesEntity);
+  }
+
+  @HandleDbErrors()
+  async findSelectList(user?: IRequestUser): Promise<SelectOptionDto[]> {
+    const qb = this.repository.createQueryBuilder('role').select(['role.id', 'role.name']);
+
+    if (user?.role?.contextId) {
+      qb.andWhere('role.context_id = :contextId', { contextId: user.role.contextId });
+    }
+
+    const entities = await qb.getMany();
+    return entities.map((entity) => RolesMapper.toSelectOption(entity));
   }
 
   @HandleDbErrors()
