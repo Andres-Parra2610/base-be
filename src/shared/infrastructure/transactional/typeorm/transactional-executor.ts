@@ -2,7 +2,7 @@ import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
 import { DbTransactionService } from './transaction.service';
-import { TRANSACTIONAL_KEY } from './decorators/transactional.decorator';
+import { TRANSACTIONAL_KEY } from '../../../../core/decorators/transactional.decorator';
 
 /**
  * Scans all providers in the application on bootstrap,
@@ -23,17 +23,12 @@ export class TransactionalExecutor implements OnApplicationBootstrap {
   private applyTransactionalWrappers() {
     // Get all providers that have instances
     const providers = this.discovery.getProviders().filter((p) => p.instance);
-    console.log(`[TransactionalExecutor] Found ${providers.length} providers with instances`);
 
     for (const wrapper of providers) {
       const instance = wrapper.instance;
       const prototype = Object.getPrototypeOf(instance);
       if (!prototype) continue;
 
-      const isCreateUserUseCase = instance.constructor.name === 'CreateUserUseCase';
-      if (isCreateUserUseCase) {
-        console.log(`[TransactionalExecutor] Inspecting CreateUserUseCase instance`);
-      }
       // Get all method names from the prototype
       const methodNames = this.scanner.scanFromPrototype(instance, prototype, (name) => name);
       for (const methodName of methodNames) {
@@ -45,17 +40,8 @@ export class TransactionalExecutor implements OnApplicationBootstrap {
           propagation?: boolean;
         }>(TRANSACTIONAL_KEY, originalMethod);
 
-        if (instance.constructor.name === 'CreateUserUseCase' && methodName === 'execute') {
-          console.log(
-            `[TransactionalExecutor] Checking CreateUserUseCase.execute metadata:`,
-            metadata,
-          );
-        }
-
         if (!metadata) continue;
-        console.log(
-          `[TransactionalExecutor] Wrapping method: ${instance.constructor.name}.${methodName}`,
-        );
+
         // Wrap the original method inside executeInTransaction
         instance[methodName] = async (...args: unknown[]) => {
           return this.transactionService.executeInTransaction(
