@@ -224,23 +224,22 @@ EOL
 
 # 8. Repository Implementation
 cat > "$BASE_DIR/infrastucture/persistence/respositories/$MODULE_NAME.repository.ts" <<EOL
-import { Inject, Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { DbTransactionContext } from '@/src/shared/infrastructure/transactional/typeorm/transaction-context';
 import { I${PASCAL_CASE}Repository } from '../../../domain/ports/$MODULE_NAME-repository.port';
 import { ${PASCAL_CASE}Model } from '../../../domain/models/$MODULE_NAME.model';
 import { ${PASCAL_CASE}Entity } from '../entities/$MODULE_NAME.entity';
 import { PaginationResponse } from '@/src/shared/infrastructure/types/pagination.type';
 import { QueryDto } from '@/src/utils/dto/pagination.dto';
+import { DbTransactionContext } from '@/src/shared/infrastructure/persistent/typeorm/db-transaction-context';
 
 @Injectable()
 export class ${PASCAL_CASE}Repository implements I${PASCAL_CASE}Repository {
-  private readonly repository: Repository<${PASCAL_CASE}Entity>;
+  constructor(private readonly transactionContext: DbTransactionContext) {}
 
-  constructor(
-    @Inject('DATA_SOURCE')
-    private readonly dataSource: DataSource,
-  ) {
-    this.repository = dataSource.getRepository(${PASCAL_CASE}Entity);
+  private get repository(): Repository<${PASCAL_CASE}Entity> {
+    return this.transactionContext.getEntityManager().getRepository(${PASCAL_CASE}Entity);
   }
 
   create(entity: ${PASCAL_CASE}Model): Promise<${PASCAL_CASE}Model> {
