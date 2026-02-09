@@ -17,9 +17,10 @@ import { DbTransactionContext } from '@/src/shared/infrastructure/transactional/
 
 @Injectable()
 export class UserRepository implements IUserRepository {
-  private readonly repository: Repository<UserEntity>;
-  constructor(private readonly transactionContext: DbTransactionContext) {
-    this.repository = this.transactionContext.getEntityManager().getRepository(UserEntity);
+  constructor(private readonly transactionContext: DbTransactionContext) {}
+
+  private get repository(): Repository<UserEntity> {
+    return this.transactionContext.getEntityManager().getRepository(UserEntity);
   }
 
   @HandleDbErrors()

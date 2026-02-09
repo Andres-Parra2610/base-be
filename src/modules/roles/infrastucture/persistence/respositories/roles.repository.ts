@@ -15,10 +15,10 @@ import { DbTransactionContext } from '@/src/shared/infrastructure/transactional/
 
 @Injectable()
 export class RolesRepository implements IRolesRepository {
-  private readonly repository: Repository<RolesEntity>;
+  constructor(private readonly transactionContext: DbTransactionContext) {}
 
-  constructor(private readonly transactionContext: DbTransactionContext) {
-    this.repository = this.transactionContext.getEntityManager().getRepository(RolesEntity);
+  private get repository(): Repository<RolesEntity> {
+    return this.transactionContext.getEntityManager().getRepository(RolesEntity);
   }
 
   @HandleDbErrors()

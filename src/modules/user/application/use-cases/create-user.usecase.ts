@@ -7,6 +7,7 @@ import { FindOneRolesUseCase } from '@/src/modules/roles/application/use-cases/f
 import { UserRoleModel } from '../../domain/models/user-role.model';
 import { IUserRoleRepository } from '../../domain/ports/user-role-repository.port';
 import { UserResponse } from '../interfaces/response-user.interface';
+import { Transactional } from '@/src/shared/infrastructure/transactional/typeorm/decorators/transactional.decorator';
 
 export class CreateUserUseCase {
   constructor(
@@ -15,6 +16,7 @@ export class CreateUserUseCase {
     private readonly findRoleByIdUseCase: FindOneRolesUseCase,
   ) {}
 
+  @Transactional()
   async execute(createUserDto: ICreateUser): Promise<UserResponse> {
     UserModel.validatePassword(createUserDto.password || '');
 
@@ -35,6 +37,8 @@ export class CreateUserUseCase {
     });
 
     const userCreated = await this.userRepository.create(user);
+    //Probar si la transaccion funciona
+    throw new Error('Error de prueba');
     await this.userRoleRepository.create(userRole);
     return {
       ...userCreated,

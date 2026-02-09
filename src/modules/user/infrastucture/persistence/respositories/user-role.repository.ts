@@ -9,10 +9,10 @@ import { DbTransactionContext } from '@/src/shared/infrastructure/transactional/
 
 @Injectable()
 export class UserRoleRepository implements IUserRoleRepository {
-  private readonly repository: Repository<UserRoleEntity>;
+  constructor(private readonly transactionContext: DbTransactionContext) {}
 
-  constructor(private readonly transactionContext: DbTransactionContext) {
-    this.repository = this.transactionContext.getEntityManager().getRepository(UserRoleEntity);
+  private get repository(): Repository<UserRoleEntity> {
+    return this.transactionContext.getEntityManager().getRepository(UserRoleEntity);
   }
 
   @HandleDbErrors()
