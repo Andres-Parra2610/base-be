@@ -6,26 +6,37 @@ import { FindOneUserUseCase } from '../application/use-cases/find-one-user.useca
 import { FindAllUserUseCase } from '../application/use-cases/find-all-user.usecase';
 import { FindUserByEmailUseCase } from '../application/use-cases/find-by-email.usecase';
 import { IUserRepository } from '../domain/ports/user-repository.port';
+import { FindOneRolesUseCase } from '../../roles/application/use-cases/find-one-roles.usecase';
+import { IUserRoleRepository } from '../domain/ports/user-role-repository.port';
 
 export const userUseCaseProviders: Provider[] = [
   {
     provide: CreateUserUseCase,
-    useFactory: (repo: IUserRepository) => new CreateUserUseCase(repo),
-    inject: ['UserRepository'],
+    useFactory: (
+      userRepo: IUserRepository,
+      userRoleRepo: IUserRoleRepository,
+      findRoleByIdUseCase: FindOneRolesUseCase,
+    ) => new CreateUserUseCase(userRepo, userRoleRepo, findRoleByIdUseCase),
+    inject: ['UserRepository', 'UserRoleRepository', FindOneRolesUseCase],
   },
   {
     provide: UpdateUserUseCase,
-    useFactory: (repo: IUserRepository) => new UpdateUserUseCase(repo),
-    inject: ['UserRepository'],
+    useFactory: (
+      userRepo: IUserRepository,
+      userRoleRepo: IUserRoleRepository,
+      findRoleByIdUseCase: FindOneRolesUseCase,
+    ) => new UpdateUserUseCase(userRepo, userRoleRepo, findRoleByIdUseCase),
+    inject: ['UserRepository', 'UserRoleRepository', FindOneRolesUseCase],
   },
   {
     provide: DeleteUserUseCase,
-    useFactory: (repo: IUserRepository) => new DeleteUserUseCase(repo),
-    inject: ['UserRepository'],
+    useFactory: (userRepo: IUserRepository, userRoleRepo: IUserRoleRepository) =>
+      new DeleteUserUseCase(userRepo, userRoleRepo),
+    inject: ['UserRepository', 'UserRoleRepository'],
   },
   {
     provide: FindOneUserUseCase,
-    useFactory: (repo: IUserRepository) => new FindOneUserUseCase(repo),
+    useFactory: (userRepo: IUserRepository) => new FindOneUserUseCase(userRepo),
     inject: ['UserRepository'],
   },
   {

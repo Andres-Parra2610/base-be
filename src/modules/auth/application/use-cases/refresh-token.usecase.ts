@@ -3,6 +3,7 @@ import { ITokenPort } from '../ports/token.port';
 import { ApplicationError } from '@/src/utils/errors/application.error';
 import { UserModel } from '@/src/modules/user/domain/models/user.model';
 import { FindOneUserUseCase } from '@/src/modules/user/application/use-cases/find-one-user.usecase';
+import { UserResponse } from '@/src/modules/user/application/interfaces/response-user.interface';
 
 @Injectable()
 export class RefreshTokenUseCase {
@@ -13,7 +14,7 @@ export class RefreshTokenUseCase {
 
   async execute(
     refreshToken: string,
-  ): Promise<{ token: string; refreshToken: string; user: UserModel }> {
+  ): Promise<{ token: string; refreshToken: string; user: UserResponse }> {
     try {
       const payload = this.tokenService.verifyRefreshToken(refreshToken);
       const user = await this.findUserByIdUseCase.execute(payload.id);
@@ -25,11 +26,13 @@ export class RefreshTokenUseCase {
       const newAccessToken = this.tokenService.generateToken({
         id: user.id,
         email: user.email,
+        isStaff: user.isStaff,
       });
 
       const newRefreshToken = this.tokenService.generateRefreshToken({
         id: user.id,
         email: user.email,
+        isStaff: user.isStaff,
       });
 
       return {
@@ -38,7 +41,7 @@ export class RefreshTokenUseCase {
         user: {
           ...user,
           password: undefined,
-        } as UserModel,
+        } as UserResponse,
       };
     } catch (error) {
       console.error(error);

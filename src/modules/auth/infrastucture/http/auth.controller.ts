@@ -1,5 +1,5 @@
 import '@fastify/cookie';
-import { Body, Controller, Post, Headers as HeadersDec, Res, Req } from '@nestjs/common';
+import { Body, Controller, Post, Headers as HeadersDec, Res, Req, Logger } from '@nestjs/common';
 import { LoginAuthDto } from './dto/create-auth.dto';
 import { LoginUseCase } from '../../application/use-cases/login.usecase';
 import { FastifyReply } from 'fastify';
@@ -10,6 +10,7 @@ import { Public } from '@/src/core/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
   constructor(
     private readonly loginUseCase: LoginUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
@@ -28,13 +29,13 @@ export class AuthController {
       (res as any).setCookie('access_token', result.token, {
         httpOnly: true,
         path: '/',
-        signed: true,
+        signed: false,
         secure: env.NODE_ENV === 'production',
       });
       (res as any).setCookie('refresh_token', result.refreshToken, {
         httpOnly: true,
         path: '/',
-        signed: true,
+        signed: false,
         secure: env.NODE_ENV === 'production',
       });
       return { user: result.user };

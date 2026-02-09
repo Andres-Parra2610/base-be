@@ -88,7 +88,7 @@ cat > "$BASE_DIR/application/use-cases/create-$MODULE_NAME.usecase.ts" <<EOL
 import { I${PASCAL_CASE}Repository } from '../../domain/ports/$MODULE_NAME-repository.port';
 import { ICreate${PASCAL_CASE} } from '../interfaces/create-$MODULE_NAME.interface';
 import { ${PASCAL_CASE}Model } from '../../domain/models/$MODULE_NAME.model';
-import { generateUuidV4 } from '@/src/utils/uuid-generator';
+import { generateUuidV4 } from '@/src/utils/uuid/generate-uuid';
 
 export class Create${PASCAL_CASE}UseCase {
   constructor(private readonly repository: I${PASCAL_CASE}Repository) {}
@@ -107,13 +107,13 @@ EOL
 cat > "$BASE_DIR/application/use-cases/find-all-$MODULE_NAME.usecase.ts" <<EOL
 import { I${PASCAL_CASE}Repository } from '../../domain/ports/$MODULE_NAME-repository.port';
 import { QueryDto } from '@/src/utils/dto/pagination.dto';
-import { PaginationResult } from '@/src/utils/interfaces/pagination.interface';
+import { PaginationResponse } from '@/src/shared/infrastructure/types/pagination.type';
 import { ${PASCAL_CASE}Model } from '../../domain/models/$MODULE_NAME.model';
 
 export class FindAll${PASCAL_CASE}UseCase {
   constructor(private readonly repository: I${PASCAL_CASE}Repository) {}
 
-  async execute(query: QueryDto): Promise<PaginationResult<${PASCAL_CASE}Model>> {
+  async execute(query: QueryDto): Promise<PaginationResponse<${PASCAL_CASE}Model>> {
     return this.repository.findAll(query);
   }
 }
@@ -128,7 +128,7 @@ export class FindOne${PASCAL_CASE}UseCase {
   constructor(private readonly repository: I${PASCAL_CASE}Repository) {}
 
   async execute(id: string): Promise<${PASCAL_CASE}Model | null> {
-    return this.repository.findOne(id);
+    return this.repository.findById(id);
   }
 }
 EOL
@@ -138,13 +138,19 @@ cat > "$BASE_DIR/application/use-cases/update-$MODULE_NAME.usecase.ts" <<EOL
 import { I${PASCAL_CASE}Repository } from '../../domain/ports/$MODULE_NAME-repository.port';
 import { IUpdate${PASCAL_CASE} } from '../interfaces/update-$MODULE_NAME.interface';
 import { ${PASCAL_CASE}Model } from '../../domain/models/$MODULE_NAME.model';
+import { ApplicationError } from '@/src/utils/errors/application.error';
 
 export class Update${PASCAL_CASE}UseCase {
   constructor(private readonly repository: I${PASCAL_CASE}Repository) {}
 
   async execute(input: IUpdate${PASCAL_CASE} & { id: string }): Promise<${PASCAL_CASE}Model | null> {
     const { id, ...params } = input;
-    return this.repository.update(id, params);
+    const entity = await this.repository.findById(id);
+    if (!entity) {
+      throw new ApplicationError('Entity not found');
+    }
+    const updatedEntity = entity.cloneWith(params);
+    return this.repository.update(updatedEntity);
   }
 }
 EOL
@@ -171,7 +177,7 @@ cat > "$BASE_DIR/infrastucture/http/dto/create-$MODULE_NAME.dto.ts" <<EOL
 import { IsString, IsNotEmpty } from 'class-validator';
 import { ICreate${PASCAL_CASE} } from '../../../application/interfaces/create-$MODULE_NAME.interface';
 
-export class Create${PASCAL_CASE}Dto implements ICreate${PASCAL_CASE} {
+export class Create${PASCAL_CASE}Dto {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -183,13 +189,13 @@ import { PartialType } from '@nestjs/mapped-types';
 import { Create${PASCAL_CASE}Dto } from './create-$MODULE_NAME.dto';
 import { IUpdate${PASCAL_CASE} } from '../../../application/interfaces/update-$MODULE_NAME.interface';
 
-export class Update${PASCAL_CASE}Dto extends PartialType(Create${PASCAL_CASE}Dto) implements IUpdate${PASCAL_CASE} {}
+export class Update${PASCAL_CASE}Dto extends PartialType(Create${PASCAL_CASE}Dto) {}
 EOL
 
 # 6. TypeORM Entity
 cat > "$BASE_DIR/infrastucture/persistence/entities/$MODULE_NAME.entity.ts" <<EOL
 import { Entity, Column } from 'typeorm';
-import { BaseEntity } from '@/shared/infrastructure/persistent/typeorm/base.entity';
+import { BaseEntity } from '@/src/shared/infrastructure/persistent/typeorm/entity/base-entity';
 
 @Entity('${CAMEL_CASE}s')
 export class ${PASCAL_CASE}Entity extends BaseEntity {
@@ -219,24 +225,41 @@ EOL
 # 8. Repository Implementation
 cat > "$BASE_DIR/infrastucture/persistence/respositories/$MODULE_NAME.repository.ts" <<EOL
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BaseRepository } from '@/shared/infrastructure/persistent/typeorm/base.repository';
+import { DbTransactionContext } from '@/src/shared/infrastructure/transactional/typeorm/transaction-context';
 import { I${PASCAL_CASE}Repository } from '../../../domain/ports/$MODULE_NAME-repository.port';
 import { ${PASCAL_CASE}Model } from '../../../domain/models/$MODULE_NAME.model';
 import { ${PASCAL_CASE}Entity } from '../entities/$MODULE_NAME.entity';
-import { ${PASCAL_CASE}Mapper } from '../mappers/$MODULE_NAME.mapper';
+import { PaginationResponse } from '@/src/shared/infrastructure/types/pagination.type';
+import { QueryDto } from '@/src/utils/dto/pagination.dto';
+import { DbTransactionContext } from '@/src/shared/infrastructure/persistent/typeorm/db-transaction-context';
 
 @Injectable()
-export class ${PASCAL_CASE}Repository
-  extends BaseRepository<${PASCAL_CASE}Model, ${PASCAL_CASE}Entity>
-  implements I${PASCAL_CASE}Repository
-{
-  constructor(
-    @InjectRepository(${PASCAL_CASE}Entity)
-    private readonly repository: Repository<${PASCAL_CASE}Entity>,
-  ) {
-    super(repository, ${PASCAL_CASE}Mapper.toDomain, ${PASCAL_CASE}Mapper.toPersistence);
+export class ${PASCAL_CASE}Repository implements I${PASCAL_CASE}Repository {
+  constructor(private readonly transactionContext: DbTransactionContext) {}
+
+  private get repository(): Repository<${PASCAL_CASE}Entity> {
+    return this.transactionContext.getEntityManager().getRepository(${PASCAL_CASE}Entity);
+  }
+
+  create(entity: ${PASCAL_CASE}Model): Promise<${PASCAL_CASE}Model> {
+    throw new Error('Method not implemented.');
+  }
+
+  update(entity: ${PASCAL_CASE}Model): Promise<${PASCAL_CASE}Model> {
+    throw new Error('Method not implemented.');
+  }
+
+  delete(id: string, hard?: boolean): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+
+  findById(id: string): Promise<${PASCAL_CASE}Model | null> {
+    throw new Error('Method not implemented.');
+  }
+
+  findAll(queryDto: QueryDto): Promise<PaginationResponse<${PASCAL_CASE}Model>> {
+    throw new Error('Method not implemented.');
   }
 }
 EOL
@@ -335,17 +358,13 @@ EOL
 # 11. Module Definition
 cat > "$BASE_DIR/$MODULE_NAME.module.ts" <<EOL
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { FeatureDatabaseModule } from '@/src/shared/infrastructure/persistent/typeorm/feature-database.module';
-import { ${PASCAL_CASE}Entity } from './infrastucture/persistence/entities/$MODULE_NAME.entity';
 import { ${PASCAL_CASE}Repository } from './infrastucture/persistence/respositories/$MODULE_NAME.repository';
 import { ${PASCAL_CASE}Controller } from './infrastucture/http/$MODULE_NAME.controller';
 import { ${CAMEL_CASE}UseCaseProviders } from './providers/$MODULE_NAME-usecase.providers';
+import { DatabaseModule } from '@/src/shared/infrastructure/persistent/typeorm/database.module';
 
 @Module({
-  imports: [
-    FeatureDatabaseModule.forFeature([${PASCAL_CASE}Entity]),
-  ],
+  imports: [DatabaseModule],
   providers: [
     {
       provide: '${PASCAL_CASE}Repository',
