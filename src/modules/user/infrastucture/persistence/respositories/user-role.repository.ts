@@ -1,19 +1,18 @@
-import { DataSource, Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
 import { IUserRoleRepository } from '../../../domain/ports/user-role-repository.port';
 import { UserRoleEntity } from '../entities/user-role.entity';
-import { Inject } from '@nestjs/common';
 import { UserRoleModel } from '../../../domain/models/user-role.model';
 import { UserRoleMapper } from '../mappers/user-role.mapper';
 import { HandleDbErrors } from '@/src/core/decorators/errors/db-errors.decortator';
+import { DbTransactionContext } from '@/src/shared/infrastructure/transactional/typeorm/transaction-context';
 
+@Injectable()
 export class UserRoleRepository implements IUserRoleRepository {
   private readonly repository: Repository<UserRoleEntity>;
 
-  constructor(
-    @Inject('DATA_SOURCE')
-    private readonly dataSource: DataSource,
-  ) {
-    this.repository = this.dataSource.getRepository(UserRoleEntity);
+  constructor(private readonly transactionContext: DbTransactionContext) {
+    this.repository = this.transactionContext.getEntityManager().getRepository(UserRoleEntity);
   }
 
   @HandleDbErrors()
