@@ -11,16 +11,14 @@ import { TypeOrmQueryHelper } from '@/src/shared/infrastructure/persistent/typeo
 import { IRequestUser } from '@/src/core/decorators/user.decorator';
 import { ResponseRoles } from '../../../application/interfaces/response-roles.interface';
 import { SelectOptionDto } from '@/src/utils/dto/select.dto';
+import { DbTransactionContext } from '@/src/shared/infrastructure/transactional/typeorm/transaction-context';
 
 @Injectable()
 export class RolesRepository implements IRolesRepository {
   private readonly repository: Repository<RolesEntity>;
 
-  constructor(
-    @Inject('DATA_SOURCE')
-    private readonly dataSource: DataSource,
-  ) {
-    this.repository = dataSource.getRepository(RolesEntity);
+  constructor(private readonly transactionContext: DbTransactionContext) {
+    this.repository = this.transactionContext.getEntityManager().getRepository(RolesEntity);
   }
 
   @HandleDbErrors()

@@ -5,9 +5,10 @@ import { UserController } from './infrastucture/http/user.controller';
 import { userUseCaseProviders } from './providers/user-usecase.providers';
 import { RolesModule } from '../roles/roles.module';
 import { UserRoleRepository } from './infrastucture/persistence/respositories/user-role.repository';
+import { TypeOrmTransactionModule } from '@/src/shared/infrastructure/transactional/typeorm/typeorm-transaction.module';
 
 @Module({
-  imports: [DatabaseModule, RolesModule],
+  imports: [TypeOrmTransactionModule, RolesModule],
   providers: [
     {
       provide: 'UserRepository',

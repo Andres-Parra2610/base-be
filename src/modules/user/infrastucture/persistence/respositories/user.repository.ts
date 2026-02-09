@@ -13,15 +13,13 @@ import { QueryDto } from '@/src/utils/dto/pagination.dto';
 import { PaginationResponse } from '@/src/shared/infrastructure/types/pagination.type';
 import { UserResponse } from '../../../application/interfaces/response-user.interface';
 import { IRequestUser } from '@/src/core/decorators/user.decorator';
+import { DbTransactionContext } from '@/src/shared/infrastructure/transactional/typeorm/transaction-context';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
   private readonly repository: Repository<UserEntity>;
-  constructor(
-    @Inject('DATA_SOURCE')
-    private readonly dataSource: DataSource,
-  ) {
-    this.repository = this.dataSource.getRepository(UserEntity);
+  constructor(private readonly transactionContext: DbTransactionContext) {
+    this.repository = this.transactionContext.getEntityManager().getRepository(UserEntity);
   }
 
   @HandleDbErrors()
