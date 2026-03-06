@@ -6,7 +6,6 @@ export interface UserModelParams extends BaseModelParams {
   fullName: string;
   email: string;
   password?: string;
-  isStaff: boolean;
 }
 
 export class UserModel extends BaseModel<UserModelParams> {
@@ -24,7 +23,6 @@ export class UserModel extends BaseModel<UserModelParams> {
     this.fullName = params.fullName;
     this.email = params.email;
     this.password = params.password;
-    this.isStaff = params.isStaff;
   }
 
   private validateEmail(email: string) {

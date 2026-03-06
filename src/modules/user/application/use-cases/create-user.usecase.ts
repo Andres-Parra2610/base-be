@@ -15,7 +15,6 @@ export class CreateUserUseCase {
       fullName: createUserDto.fullName,
       email: createUserDto.email,
       password: hashPassword(createUserDto.password || ''),
-      isStaff: createUserDto.isStaff,
     });
 
     return this.userRepository.create(user);

@@ -13,7 +13,4 @@ export class UserEntity extends BaseEntity {
 
   @Column({ name: 'password', nullable: false })
   password: string;
-
-  @Column({ name: 'is_staff', type: 'boolean', nullable: false, default: false })
-  isStaff: boolean;
 }

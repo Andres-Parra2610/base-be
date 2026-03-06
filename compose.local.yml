@@ -11,24 +11,24 @@ services:
       - ${PORT}:${PORT}
     env_file:
       - .env
-    container_name: livestock-backend
+    container_name: base-be
     environment:
       - PORT=${PORT}
       - NODE_ENV=development
-      - DATABASE_HOST=livestock-db
+      - DATABASE_HOST=base-db
       - DATABASE_PORT=5432
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=postgres
-      - DATABASE_NAME=livestock
+      - DATABASE_NAME=base
       - JWT_SECRET=secret
       - JWT_REFRESH_TOKEN=refresh_token
       - LOGGER_LEVEL=${LOGGER_LEVEL}
     depends_on:
-      - livestock-db
+      - base-db
 
   #================= Database =================
 
-  livestock-db:
+  base-db:
     image: postgres:17.0-alpine
     restart: always
     ports:
@@ -38,9 +38,9 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=livestock
+      - POSTGRES_DB=base
 
-  livestock-db-test:
+  base-db-test:
     image: postgres:17.0-alpine
     restart: always
     ports:
@@ -50,4 +50,4 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=livestock_test
+      - POSTGRES_DB=base_test
