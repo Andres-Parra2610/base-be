@@ -20,7 +20,7 @@ export const dataSource = new DataSource({
   migrations: [join(__dirname, 'migrations', '*{.ts,.js}')],
   subscribers: [join(__dirname, 'subscribers', '*{.ts,.js}')],
   migrationsTableName: 'migrations',
-  synchronize: false,
+  synchronize: env.NODE_ENV === NODE_ENV.TEST,
   ssl: isProduction
     ? {
         rejectUnauthorized: false,
