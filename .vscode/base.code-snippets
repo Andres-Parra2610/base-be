@@ -1,0 +1,34 @@
+{
+	"NestJS Repository": {
+		"prefix": "nest-repo",
+		"body": [
+			"import { Injectable } from \"@nestjs/common\";",
+			"import { DataSource, Repository } from \"typeorm\";",
+			"import { ${1:EntityName} } from \"src/shared/entities/${2:entity-file-name}.entity\";",
+			"",
+			"@Injectable()",
+			"export class ${1:EntityName}Repository extends Repository<${1:EntityName}> {",
+			"  constructor(private dataSource: DataSource) {",
+			"    super(${1:EntityName}, dataSource.manager);",
+			"  }",
+			"}"
+		],
+		"description": "Create a NestJS Repository extending TypeORM Repository"
+	},
+	"NestJS Repository Provider": {
+		"prefix": "nest-repo-provider",
+		"body": [
+			"import { DataSource } from 'typeorm';",
+			"import { ${1:EntityName}Repository } from './${2:file-name}.repository';",
+			"",
+			"export const ${3:camelCaseName}Providers = [",
+			"  {",
+			"    provide: ${1:EntityName}Repository,",
+			"    useFactory: (dataSource: DataSource) => new ${1:EntityName}Repository(dataSource),",
+			"    inject: ['DATA_SOURCE'],",
+			"  },",
+			"];"
+		],
+		"description": "Create a NestJS Repository Provider configuration"
+	}
+}
