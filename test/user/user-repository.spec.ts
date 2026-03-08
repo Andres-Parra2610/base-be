@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Repository, SelectQueryBuilder, DataSource } from 'typeorm';
-import { UserRepository } from '../../src/modules/user/infrastucture/persistence/respositories/user.repository';
-import { UserEntity } from '../../src/modules/user/infrastucture/persistence/entities/user.entity';
+import { UserRepository } from '../../src/modules/user/infrastructure/persistence/repositories/user.repository';
+import { UserEntity } from '../../src/modules/user/infrastructure/persistence/entities/user.entity';
 import { FilterOperator, QueryDto } from '../../src/utils/dto/pagination.dto';
-import { UserMapper } from '../../src/modules/user/infrastucture/persistence/mappers/user.mapper';
+import { UserMapper } from '../../src/modules/user/infrastructure/persistence/mappers/user.mapper';
 
 // Mock Data matching the user's provided JSON
 const mockUsersData = [

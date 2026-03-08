@@ -22,16 +22,16 @@ echo "Generating module: $MODULE_NAME"
 echo "PascalCase: $PASCAL_CASE"
 echo "camelCase: $CAMEL_CASE"
 
-# Create Directory Structure (Note: intentional typos 'infrastucture' and 'respositories' to match project)
+# Create Directory Structure (Note: intentional typos 'infrastructure' and 'repositories' to match project)
 mkdir -p "$BASE_DIR/application/interfaces"
 mkdir -p "$BASE_DIR/application/use-cases"
 mkdir -p "$BASE_DIR/domain/exceptions"
 mkdir -p "$BASE_DIR/domain/models"
 mkdir -p "$BASE_DIR/domain/ports"
-mkdir -p "$BASE_DIR/infrastucture/http/dto"
-mkdir -p "$BASE_DIR/infrastucture/persistence/entities"
-mkdir -p "$BASE_DIR/infrastucture/persistence/mappers"
-mkdir -p "$BASE_DIR/infrastucture/persistence/respositories"
+mkdir -p "$BASE_DIR/infrastructure/http/dto"
+mkdir -p "$BASE_DIR/infrastructure/persistence/entities"
+mkdir -p "$BASE_DIR/infrastructure/persistence/mappers"
+mkdir -p "$BASE_DIR/infrastructure/persistence/repositories"
 mkdir -p "$BASE_DIR/providers"
 
 # ==========================================
@@ -63,6 +63,16 @@ import { IBaseRepository } from '@/shared/domain/ports/base-repository.port';
 import { ${PASCAL_CASE}Model } from '../models/$MODULE_NAME.model';
 
 export interface I${PASCAL_CASE}Repository extends IBaseRepository<${PASCAL_CASE}Model> {}
+EOL
+
+cat > "$BASE_DIR/domain/ports/$MODULE_NAME-query-repository.port.ts" <<EOL
+import { QueryDto } from '@/src/utils/dto/pagination.dto';
+import { PaginationResponse } from '@/src/shared/infrastructure/types/pagination.type';
+import { ${PASCAL_CASE}Model } from '../models/$MODULE_NAME.model';
+
+export interface I${PASCAL_CASE}QueryRepository {
+  findAll(queryDto: QueryDto): Promise<PaginationResponse<${PASCAL_CASE}Model>>;
+}
 EOL
 
 # ==========================================
@@ -105,13 +115,13 @@ EOL
 
 # Find All
 cat > "$BASE_DIR/application/use-cases/find-all-$MODULE_NAME.usecase.ts" <<EOL
-import { I${PASCAL_CASE}Repository } from '../../domain/ports/$MODULE_NAME-repository.port';
+import { I${PASCAL_CASE}QueryRepository } from '../../domain/ports/$MODULE_NAME-query-repository.port';
 import { QueryDto } from '@/src/utils/dto/pagination.dto';
 import { PaginationResponse } from '@/src/shared/infrastructure/types/pagination.type';
 import { ${PASCAL_CASE}Model } from '../../domain/models/$MODULE_NAME.model';
 
 export class FindAll${PASCAL_CASE}UseCase {
-  constructor(private readonly repository: I${PASCAL_CASE}Repository) {}
+  constructor(private readonly repository: I${PASCAL_CASE}QueryRepository) {}
 
   async execute(query: QueryDto): Promise<PaginationResponse<${PASCAL_CASE}Model>> {
     return this.repository.findAll(query);
@@ -173,7 +183,7 @@ EOL
 # ==========================================
 
 # 5. DTOs
-cat > "$BASE_DIR/infrastucture/http/dto/create-$MODULE_NAME.dto.ts" <<EOL
+cat > "$BASE_DIR/infrastructure/http/dto/create-$MODULE_NAME.dto.ts" <<EOL
 import { IsString, IsNotEmpty } from 'class-validator';
 import { ICreate${PASCAL_CASE} } from '../../../application/interfaces/create-$MODULE_NAME.interface';
 
@@ -184,7 +194,7 @@ export class Create${PASCAL_CASE}Dto {
 }
 EOL
 
-cat > "$BASE_DIR/infrastucture/http/dto/update-$MODULE_NAME.dto.ts" <<EOL
+cat > "$BASE_DIR/infrastructure/http/dto/update-$MODULE_NAME.dto.ts" <<EOL
 import { PartialType } from '@nestjs/mapped-types';
 import { Create${PASCAL_CASE}Dto } from './create-$MODULE_NAME.dto';
 import { IUpdate${PASCAL_CASE} } from '../../../application/interfaces/update-$MODULE_NAME.interface';
@@ -193,7 +203,7 @@ export class Update${PASCAL_CASE}Dto extends PartialType(Create${PASCAL_CASE}Dto
 EOL
 
 # 6. TypeORM Entity
-cat > "$BASE_DIR/infrastucture/persistence/entities/$MODULE_NAME.entity.ts" <<EOL
+cat > "$BASE_DIR/infrastructure/persistence/entities/$MODULE_NAME.entity.ts" <<EOL
 import { Entity, Column } from 'typeorm';
 import { BaseEntity } from '@/src/shared/infrastructure/persistent/typeorm/entity/base-entity';
 
@@ -205,7 +215,7 @@ export class ${PASCAL_CASE}Entity extends BaseEntity {
 EOL
 
 # 7. Mapper
-cat > "$BASE_DIR/infrastucture/persistence/mappers/$MODULE_NAME.mapper.ts" <<EOL
+cat > "$BASE_DIR/infrastructure/persistence/mappers/$MODULE_NAME.mapper.ts" <<EOL
 import { ${PASCAL_CASE}Model } from '../../../domain/models/$MODULE_NAME.model';
 import { ${PASCAL_CASE}Entity } from '../entities/$MODULE_NAME.entity';
 
@@ -223,16 +233,13 @@ export class ${PASCAL_CASE}Mapper {
 EOL
 
 # 8. Repository Implementation
-cat > "$BASE_DIR/infrastucture/persistence/respositories/$MODULE_NAME.repository.ts" <<EOL
+cat > "$BASE_DIR/infrastructure/persistence/repositories/$MODULE_NAME.repository.ts" <<EOL
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { DbTransactionContext } from '@/src/shared/infrastructure/transactional/typeorm/transaction-context';
+import { DbTransactionContext } from '@/src/shared/infrastructure/persistent/typeorm/db-transaction-context';
 import { I${PASCAL_CASE}Repository } from '../../../domain/ports/$MODULE_NAME-repository.port';
 import { ${PASCAL_CASE}Model } from '../../../domain/models/$MODULE_NAME.model';
 import { ${PASCAL_CASE}Entity } from '../entities/$MODULE_NAME.entity';
-import { PaginationResponse } from '@/src/shared/infrastructure/types/pagination.type';
-import { QueryDto } from '@/src/utils/dto/pagination.dto';
-import { DbTransactionContext } from '@/src/shared/infrastructure/persistent/typeorm/db-transaction-context';
 
 @Injectable()
 export class ${PASCAL_CASE}Repository implements I${PASCAL_CASE}Repository {
@@ -257,15 +264,54 @@ export class ${PASCAL_CASE}Repository implements I${PASCAL_CASE}Repository {
   findById(id: string): Promise<${PASCAL_CASE}Model | null> {
     throw new Error('Method not implemented.');
   }
+}
+EOL
 
-  findAll(queryDto: QueryDto): Promise<PaginationResponse<${PASCAL_CASE}Model>> {
-    throw new Error('Method not implemented.');
+cat > "$BASE_DIR/infrastructure/persistence/repositories/$MODULE_NAME-query-repository.ts" <<EOL
+import { Inject, Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
+import { I${PASCAL_CASE}QueryRepository } from '../../../domain/ports/$MODULE_NAME-query-repository.port';
+import { ${PASCAL_CASE}Model } from '../../../domain/models/$MODULE_NAME.model';
+import { ${PASCAL_CASE}Entity } from '../entities/$MODULE_NAME.entity';
+import { ${PASCAL_CASE}Mapper } from '../mappers/$MODULE_NAME.mapper';
+import { PaginationResponse } from '@/src/shared/infrastructure/types/pagination.type';
+import { QueryDto } from '@/src/utils/dto/pagination.dto';
+import { HandleDbErrors } from '@/src/core/decorators/errors/db-errors.decortator';
+import { TypeOrmQueryHelper } from '@/src/shared/infrastructure/persistent/typeorm/filter/typeorm-query-filter';
+
+@Injectable()
+export class ${PASCAL_CASE}QueryRepository implements I${PASCAL_CASE}QueryRepository {
+  private readonly repository: Repository<${PASCAL_CASE}Entity>;
+  
+  constructor(
+    @Inject('DATA_SOURCE')
+    private readonly dataSource: DataSource,
+  ) {
+    this.repository = this.dataSource.getRepository(${PASCAL_CASE}Entity);
+  }
+
+  @HandleDbErrors()
+  async findAll(queryDto: QueryDto): Promise<PaginationResponse<${PASCAL_CASE}Model>> {
+    const qb = this.repository.createQueryBuilder('${CAMEL_CASE}');
+
+    const allowedFilters = ['name'];
+    const allowedSort = ['createdAt', 'name'];
+
+    const queryBuilder = TypeOrmQueryHelper.applyRequest(qb, queryDto, allowedFilters, allowedSort);
+
+    const [entities, total] = await queryBuilder.getManyAndCount();
+    return {
+      data: entities.map((entity) => ${PASCAL_CASE}Mapper.toDomain(entity)),
+      total,
+      page: queryDto.page,
+      limit: queryDto.limit,
+    };
   }
 }
 EOL
 
 # 9. Controller
-cat > "$BASE_DIR/infrastucture/http/$MODULE_NAME.controller.ts" <<EOL
+cat > "$BASE_DIR/infrastructure/http/$MODULE_NAME.controller.ts" <<EOL
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { Create${PASCAL_CASE}UseCase } from '../../application/use-cases/create-$MODULE_NAME.usecase';
 import { FindAll${PASCAL_CASE}UseCase } from '../../application/use-cases/find-all-$MODULE_NAME.usecase';
@@ -325,32 +371,35 @@ import { FindAll${PASCAL_CASE}UseCase } from '../application/use-cases/find-all-
 import { FindOne${PASCAL_CASE}UseCase } from '../application/use-cases/find-one-$MODULE_NAME.usecase';
 import { Update${PASCAL_CASE}UseCase } from '../application/use-cases/update-$MODULE_NAME.usecase';
 import { Delete${PASCAL_CASE}UseCase } from '../application/use-cases/delete-$MODULE_NAME.usecase';
+import { I${PASCAL_CASE}Repository } from '../domain/ports/$MODULE_NAME-repository.port';
+import { I${PASCAL_CASE}QueryRepository } from '../domain/ports/$MODULE_NAME-query-repository.port';
+import { REPO_NAME } from '@/src/shared/infrastructure/repositories/names.repositories';
 
 export const ${CAMEL_CASE}UseCaseProviders: Provider[] = [
   {
     provide: Create${PASCAL_CASE}UseCase,
-    useFactory: (repo) => new Create${PASCAL_CASE}UseCase(repo),
-    inject: ['${PASCAL_CASE}Repository'],
+    useFactory: (repo: I${PASCAL_CASE}Repository) => new Create${PASCAL_CASE}UseCase(repo),
+    inject: [REPO_NAME.${PASCAL_CASE}_REPOSITORY],
   },
   {
     provide: FindAll${PASCAL_CASE}UseCase,
-    useFactory: (repo) => new FindAll${PASCAL_CASE}UseCase(repo),
-    inject: ['${PASCAL_CASE}Repository'],
+    useFactory: (repo: I${PASCAL_CASE}QueryRepository) => new FindAll${PASCAL_CASE}UseCase(repo),
+    inject: [REPO_NAME.${PASCAL_CASE}_QUERY_REPOSITORY],
   },
   {
     provide: FindOne${PASCAL_CASE}UseCase,
-    useFactory: (repo) => new FindOne${PASCAL_CASE}UseCase(repo),
-    inject: ['${PASCAL_CASE}Repository'],
+    useFactory: (repo: I${PASCAL_CASE}Repository) => new FindOne${PASCAL_CASE}UseCase(repo),
+    inject: [REPO_NAME.${PASCAL_CASE}_REPOSITORY],
   },
   {
     provide: Update${PASCAL_CASE}UseCase,
-    useFactory: (repo) => new Update${PASCAL_CASE}UseCase(repo),
-    inject: ['${PASCAL_CASE}Repository'],
+    useFactory: (repo: I${PASCAL_CASE}Repository) => new Update${PASCAL_CASE}UseCase(repo),
+    inject: [REPO_NAME.${PASCAL_CASE}_REPOSITORY],
   },
   {
     provide: Delete${PASCAL_CASE}UseCase,
-    useFactory: (repo) => new Delete${PASCAL_CASE}UseCase(repo),
-    inject: ['${PASCAL_CASE}Repository'],
+    useFactory: (repo: I${PASCAL_CASE}Repository) => new Delete${PASCAL_CASE}UseCase(repo),
+    inject: [REPO_NAME.${PASCAL_CASE}_REPOSITORY],
   },
 ];
 EOL
@@ -358,7 +407,7 @@ EOL
 # 11. Module Definition
 cat > "$BASE_DIR/$MODULE_NAME.module.ts" <<EOL
 import { Module } from '@nestjs/common';
-import { ${PASCAL_CASE}Controller } from './infrastucture/http/$MODULE_NAME.controller';
+import { ${PASCAL_CASE}Controller } from './infrastructure/http/$MODULE_NAME.controller';
 import { ${CAMEL_CASE}UseCaseProviders } from './providers/$MODULE_NAME-usecase.providers';
 
 @Module({
@@ -373,56 +422,69 @@ EOL
 # AUTO-UPDATE REPOSITORIES MODULE
 # ==========================================
 REPO_MODULE_FILE="src/shared/infrastructure/repositories/repositories.module.ts"
+REPO_NAMES_FILE="src/shared/infrastructure/repositories/names.repositories.ts"
 
-if [ -f "$REPO_MODULE_FILE" ]; then
+if [ -f "$REPO_MODULE_FILE" ] && [ -f "$REPO_NAMES_FILE" ]; then
 cat << 'EOF' > update-repo-module.js
 const fs = require('fs');
-const file = process.argv[2];
-const pascalCase = process.argv[3];
-const moduleName = process.argv[4];
+const repoModuleFile = process.argv[2];
+const repoNamesFile = process.argv[3];
+const pascalCase = process.argv[4];
+const moduleName = process.argv[5];
+const constantBaseName = pascalCase.replace(/([A-Z])/g, '_$1').toUpperCase().replace(/^_/, '');
 
-let content = fs.readFileSync(file, 'utf8');
+// 1. Update names.repositories.ts
+let namesContent = fs.readFileSync(repoNamesFile, 'utf8');
+const newTokens = `\n  ${constantBaseName}_REPOSITORY: '${pascalCase}Repository',\n  ${constantBaseName}_QUERY_REPOSITORY: '${pascalCase}QueryRepository',`;
 
-// 1. Add import after the last import
-const importStatement = `import { ${pascalCase}Repository } from '@/src/modules/${moduleName}/infrastucture/persistence/respositories/${moduleName}.repository';\n`;
+// Replace internal object literal right before the closing brace
+namesContent = namesContent.replace(/(,?\s*)\}\);\s*$/, ',' + newTokens + '\n});\n');
+fs.writeFileSync(repoNamesFile, namesContent);
+
+// 2. Update repositories.module.ts
+let content = fs.readFileSync(repoModuleFile, 'utf8');
+
+// Add imports
+const importRepo = `import { ${pascalCase}Repository } from '@/src/modules/${moduleName}/infrastructure/persistence/repositories/${moduleName}.repository';\n`;
+const importQueryRepo = `import { ${pascalCase}QueryRepository } from '@/src/modules/${moduleName}/infrastructure/persistence/repositories/${moduleName}-query-repository';\n`;
+
 const lastImportIndex = content.lastIndexOf('import ');
 if (lastImportIndex !== -1) {
   const lineEnd = content.indexOf('\n', lastImportIndex);
-  content = content.slice(0, lineEnd + 1) + importStatement + content.slice(lineEnd + 1);
+  content = content.slice(0, lineEnd + 1) + importRepo + importQueryRepo + content.slice(lineEnd + 1);
 } else {
-  content = importStatement + content;
+  content = importRepo + importQueryRepo + content;
 }
 
-// 2. Add to providers
+// Add to providers
 const providerMatch = content.match(/providers:\s*\[([\s\S]*?)\]/);
 if (providerMatch) {
   let innerProviders = providerMatch[1];
-  const newProvider = `\n    {\n      provide: '${pascalCase}Repository',\n      useClass: ${pascalCase}Repository,\n    },`;
-  // Trim end to safely insert without messing up closing bracket
+  const newProviders = `\n    {\n      provide: REPO_NAME.${constantBaseName}_REPOSITORY,\n      useClass: ${pascalCase}Repository,\n    },\n    {\n      provide: REPO_NAME.${constantBaseName}_QUERY_REPOSITORY,\n      useClass: ${pascalCase}QueryRepository,\n    },`;
   innerProviders = innerProviders.replace(/\s+$/, '');
-  content = content.replace(providerMatch[0], `providers: [${innerProviders}${newProvider}\n  ]`);
+  content = content.replace(providerMatch[0], `providers: [${innerProviders}${innerProviders ? ',' : ''}${newProviders}\n  ]`);
 }
 
-// 3. Add to exports
+// Add to exports
 const exportMatch = content.match(/exports:\s*\[([\s\S]*?)\]/);
 if (exportMatch) {
   let innerExports = exportMatch[1].trim();
   if (innerExports.endsWith(',')) innerExports = innerExports.slice(0, -1);
-  const newExport = innerExports ? `${innerExports}, '${pascalCase}Repository'` : `'${pascalCase}Repository'`;
-  content = content.replace(exportMatch[0], `exports: [${newExport}]`);
+  const newExports = `REPO_NAME.${constantBaseName}_REPOSITORY, REPO_NAME.${constantBaseName}_QUERY_REPOSITORY`;
+  content = content.replace(exportMatch[0], `exports: [${innerExports ? innerExports + ', ' + newExports : newExports}]`);
 }
 
-fs.writeFileSync(file, content);
+fs.writeFileSync(repoModuleFile, content);
 EOF
 
-node update-repo-module.js "$REPO_MODULE_FILE" "$PASCAL_CASE" "$MODULE_NAME"
+node update-repo-module.js "$REPO_MODULE_FILE" "$REPO_NAMES_FILE" "$PASCAL_CASE" "$MODULE_NAME"
 rm update-repo-module.js
-echo "Successfully registered ${PASCAL_CASE}Repository in RepositoriesModule."
+echo "Successfully registered CQRS-lite Repositories in Dependencies."
 else
-echo "Warning: $REPO_MODULE_FILE not found. Could not auto-register repository."
+echo "Warning: Validation files absent. Could not auto-register repository."
 fi
 
-npx prettier --write "$REPO_MODULE_FILE" > /dev/null 2>&1 || true
+npx prettier --write "$REPO_MODULE_FILE" "$REPO_NAMES_FILE" > /dev/null 2>&1 || true
 
 echo "Module $MODULE_NAME generated successfully at $BASE_DIR"
 

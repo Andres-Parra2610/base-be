@@ -30,7 +30,6 @@ services:
 
   base-db:
     image: postgres:17.0-alpine
-    restart: always
     ports:
       - '6000:5432'
     volumes:
@@ -42,7 +41,6 @@ services:
 
   base-db-test:
     image: postgres:17.0-alpine
-    restart: always
     ports:
       - '6001:5432'
     volumes:
